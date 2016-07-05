@@ -27,7 +27,7 @@
     "build:rxjs:w": "webpack --config test-rxjs/webpack.config.test.js --watch",
     "mocha:rxjs": "npm run build:rxjs && gulp mocha:rxjs",
     "mocha:rxjs:w": "npm run build:rxjs && concurrently -k \"npm run build:rxjs:w\" \"gulp mocha:rxjs:w\" ",
-    "serve": "gulp build:p && webpack && firebase serve",
+    "serve": "gulp build:p && webpack --config webpack.config.production.js && firebase serve",
     "deploy": "gulp build:p && webpack --config webpack.config.production.js && firebase deploy && firebase open hosting:site"
   },
   "repository": {

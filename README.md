@@ -14,8 +14,6 @@ $ npm run typings
 ### Run on local server
 ```
 $ npm start
-or
-$ firebase serve
 ```
 
 ---
@@ -23,7 +21,12 @@ $ firebase serve
 ### (before deploy)
 Edit `.firebaserc` for your environment.
 
-### Deploy to Firebase hosting
+### Serve on local server to check running correctly (with uglified bundle)
+```
+$ npm run serve
+```
+
+### Deploy to Firebase hosting (with uglified bundle)
 ```
 $ npm run deploy
 ```
