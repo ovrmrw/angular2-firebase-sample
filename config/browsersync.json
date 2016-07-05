@@ -1,0 +1,6 @@
+{
+  "server": {
+    "baseDir": "./.dest"
+  },
+  "ui": false
+}

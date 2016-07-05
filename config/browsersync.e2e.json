@@ -1,0 +1,8 @@
+{
+  "server": {
+    "baseDir": "./.dest"
+  },
+  "port": 5000,
+  "open": false,
+  "ui": false
+}

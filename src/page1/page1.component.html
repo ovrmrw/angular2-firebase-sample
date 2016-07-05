@@ -1,0 +1,9 @@
+<h4>{{content}}</h4>
+<button (click)="changeContent()" name="change">Change</button>
+<ul>
+  <li *ngFor="let text of texts;let i=index" id="text{{i}}">{{text}}</li>
+</ul>
+<h2>{{counter$ | async}}</h2>
+<button (click)="increment()" id="btnIncrement">Increment</button>.
+<hr />
+<div id="now">{{timeNow$ | async | date:'medium'}}</div>
