@@ -7,21 +7,23 @@ import { FirebaseUiComponent } from '../firebaseui/fbui.component';
 @Component({
   selector: 'sg-app',
   template: `
-    <h3>{{title}}</h3>
-    <nav>
-      <a linkTo="/">Home</a>
-      <a linkTo="/blog">Foo(empty)</a>
-    </nav>
-
     <div *ngIf="!(user | async)">
-      <button (click)="login()">Google LogIn</button>
+      <button (click)="signIn()">Google Sign in</button>
+      <button (click)="firebaseui()">Firebase UI</button>
     </div>
     <div *ngIf="(user | async)">
-      <button (click)="logout()">Google LogOut</button>
+      <button (click)="signOut()">Sign out</button>
       <div>{{email | async}} としてログイン中</div>
     </div>
-    
-    <route-view *ngIf="(user | async)"></route-view>
+
+    <div *ngIf="(user | async)">
+      <h3>{{title}}</h3>
+      <nav>
+        <a linkTo="/">Home</a>
+        <a linkTo="/blog">Foo(empty)</a>
+      </nav>
+      <route-view></route-view>
+    </div>    
   `,
   providers: [AppService],
   changeDetection: ChangeDetectionStrategy.Default
@@ -33,12 +35,16 @@ export class AppComponent implements OnInit {
 
   ngOnInit() { }
 
-  login() {
-    this.service.loginGoogleAuth();
+  signIn() {
+    this.service.signInGoogleAuth();
   }
 
-  logout() {
-    this.service.logout();
+  signOut() {
+    this.service.signOut();
+  }
+
+  firebaseui(){
+    window.location.href = 'signin.html';
   }
 
   get user() { return this.service.user$; }

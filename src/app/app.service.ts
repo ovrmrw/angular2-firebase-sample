@@ -14,11 +14,11 @@ export class AppService {
     this.googleProvider.addScope('https://www.googleapis.com/auth/plus.login');
   }
 
-  loginGoogleAuth() {
+  signInGoogleAuth() {
     this.store.firebase.auth().signInWithRedirect(this.googleProvider);
   }
 
-  logout() {
+  signOut() {
     this.store.firebase.auth().signOut();
   }
 
