@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Page1Component } from '../page1/page1.component';
+import { AppService } from './app.service';
 
 
 @Component({
@@ -12,9 +13,18 @@ import { Page1Component } from '../page1/page1.component';
     </nav>
     <route-view></route-view>
   `,
+  providers: [AppService],
   changeDetection: ChangeDetectionStrategy.Default
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+  constructor(
+    private service: AppService
+  ) {
+    this.service.jumpSignInPageIfUserIsNotLoggedIn();
+  }
+
+  ngOnInit() { }
+
   title: string = 'top component';
 }
 

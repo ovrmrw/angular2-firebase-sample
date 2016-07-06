@@ -3,7 +3,7 @@
 const webpack = require('webpack');
 
 const atlQueryForTest = { // stands for 'awesome-typescript-loader query'
-  library: 'es2015', // = 'es6'
+  library: 'es6',
   useBabel: true,
   babelOptions: {
     presets: ['es2015'],

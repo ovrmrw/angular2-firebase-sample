@@ -62,7 +62,7 @@ gulp.task('clean', () => {
 
 gulp.task('copy', ['clean'], () => {
   const files = [
-    './public/index.html',
+    './public/*.html',
     './node_modules/core-js/client/shim.min.js',
     './node_modules/babel-polyfill/dist/polyfill.min.js'
   ];
