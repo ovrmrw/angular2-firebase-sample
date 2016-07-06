@@ -1,30 +1,26 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { Page1Component } from '../page1/page1.component';
+
 import { AppService } from './app.service';
-import { FirebaseUiComponent } from '../firebaseui/fbui.component';
+import { Page1Component } from '../page1/page1.component';
+import { AuthComponent } from '../auth/auth.component';
 
 
 @Component({
   selector: 'sg-app',
   template: `
-    <div *ngIf="!(user | async)">
-      <button (click)="signIn()">Google Sign in</button>
-      <button (click)="firebaseui()">Firebase UI</button>
-    </div>
-    <div *ngIf="(user | async)">
-      <button (click)="signOut()">Sign out</button>
-      <div>{{email | async}} としてログイン中</div>
-    </div>
+    <sg-auth></sg-auth>
 
-    <div *ngIf="(user | async)">
+    <ng-container *ngIf="(user$ | async)">
       <h3>{{title}}</h3>
       <nav>
         <a linkTo="/">Home</a>
         <a linkTo="/blog">Foo(empty)</a>
       </nav>
+      <button (click)="writeUserData()">writeUserData</button>
       <route-view></route-view>
-    </div>    
+    </ng-container>    
   `,
+  directives: [AuthComponent],
   providers: [AppService],
   changeDetection: ChangeDetectionStrategy.Default
 })
@@ -35,20 +31,11 @@ export class AppComponent implements OnInit {
 
   ngOnInit() { }
 
-  signIn() {
-    this.service.signInGoogleAuth();
+  writeUserData(){
+    this.service.writeUserData();
   }
 
-  signOut() {
-    this.service.signOut();
-  }
-
-  firebaseui(){
-    window.location.href = 'signin.html';
-  }
-
-  get user() { return this.service.user$; }
-  get email() { return this.service.user$.map(user => user.email); }
+  get user$() { return this.service.user$; }
 
   title: string = 'top component';
 }

@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
 import firebase from 'firebase';
-import { Store } from '../store/store';
+
+import { Store } from '../store';
+
 
 @Injectable()
-export class FirebaseUiService {
+export class AuthService {
   private googleProvider: firebase.auth.GoogleAuthProvider;
 
   constructor(
@@ -13,13 +15,15 @@ export class FirebaseUiService {
     this.googleProvider.addScope('https://www.googleapis.com/auth/plus.login');
   }
 
-  loginGoogleAuth() {
+  signInGoogleAuth() {
     this.store.firebase.auth().signInWithRedirect(this.googleProvider);
   }
 
-  logout() {
+  signOut() {
     this.store.firebase.auth().signOut();
+    window.location.reload();
   }
 
   get user$() { return this.store.user$; }
+  get userName$() { return this.store.userName$; }
 }

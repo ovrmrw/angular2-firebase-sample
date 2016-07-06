@@ -1,13 +1,11 @@
-// declare var process: any;
-
 import 'zone.js/dist/zone';
 
 import { enableProdMode } from '@angular/core';
 import { bootstrap } from '@angular/platform-browser-dynamic';
-import { provideRouter, HashLocationStrategy } from '@ngrx/router';
+import { provideRouter, HashLocationStrategy, PathLocationStrategy } from '@ngrx/router';
 
 import { AppComponent, routes } from './app/app.component';
-import { Store } from './store/store';    
+import { Store } from './store';    
 
 
 if (process.env.ENV === 'production') {
@@ -15,6 +13,7 @@ if (process.env.ENV === 'production') {
 }
 
 bootstrap(AppComponent, [
-  provideRouter(routes, HashLocationStrategy),
+  // provideRouter(routes, HashLocationStrategy),
+  provideRouter(routes, PathLocationStrategy),
   Store,
 ]);

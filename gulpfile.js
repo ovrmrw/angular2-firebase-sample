@@ -64,7 +64,9 @@ gulp.task('copy', ['clean'], () => {
   const files = [
     './public/*.html',
     './node_modules/core-js/client/shim.min.js',
-    './node_modules/babel-polyfill/dist/polyfill.min.js'
+    './node_modules/babel-polyfill/dist/polyfill.min.js',
+    './node_modules/firebase/firebase-app.js',
+    './node_modules/firebase/firebase-auth.js'
   ];
   return gulp.src(files)
     .pipe(gulp.dest('./.dest'));

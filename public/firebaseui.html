@@ -3,14 +3,12 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Sample FirebaseUI App</title>
-  <!-- *******************************************************************************************
-       * TODO(DEVELOPER): Paste the initialization snippet from:
-       * Firebase Console > Overview > Add Firebase to your web app. *
-       ***************************************************************************************** -->
-  <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase-database.js"></script>
+  <title>FirebaseUI(beta)</title>
+  <!--<script src="https://www.gstatic.com/firebasejs/3.1.0/firebase-app.js"></script>-->
+  <!--<script src="https://www.gstatic.com/firebasejs/3.1.0/firebase-auth.js"></script>-->
+  <!--<script src="https://www.gstatic.com/firebasejs/3.1.0/firebase-database.js"></script>-->
+  <script src="firebase-app.js"></script>
+  <script src="firebase-auth.js"></script>
 
   <script src="https://www.gstatic.com/firebasejs/ui/live/0.4/firebase-ui-auth.js"></script>
   <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/live/0.4/firebase-ui-auth.css" />
@@ -29,8 +27,8 @@
       'signInOptions': [
         // Leave the lines as is for the providers you want to offer your users.
         firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        // firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-        // firebase.auth.TwitterAuthProvider.PROVIDER_ID,
+        firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+        firebase.auth.TwitterAuthProvider.PROVIDER_ID,
         // firebase.auth.GithubAuthProvider.PROVIDER_ID,
         firebase.auth.EmailAuthProvider.PROVIDER_ID
       ],
@@ -46,7 +44,7 @@
 </head>
 
 <body>
-  <h3>Firebase UI (beta)</h3>
+  <h2>Firebase UI (beta)</h2>
   <!-- The surrounding HTML is left untouched by FirebaseUI.
          Your app may use that space for branding, controls and other customizations.-->
   <div id="firebaseui-auth-container"></div>

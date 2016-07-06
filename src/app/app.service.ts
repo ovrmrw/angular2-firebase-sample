@@ -1,26 +1,41 @@
 import { Injectable } from '@angular/core';
 import firebase from 'firebase';
-import { Store } from '../store/store';
+
+import { Store } from '../store';
 
 
 @Injectable()
 export class AppService {
-  private googleProvider: firebase.auth.GoogleAuthProvider;
+  private database: firebase.database.Database;
 
   constructor(
     private store: Store
   ) {
-    this.googleProvider = new firebase.auth.GoogleAuthProvider();
-    this.googleProvider.addScope('https://www.googleapis.com/auth/plus.login');
-  }
-
-  signInGoogleAuth() {
-    this.store.firebase.auth().signInWithRedirect(this.googleProvider);
-  }
-
-  signOut() {
-    this.store.firebase.auth().signOut();
+    this.database = store.firebase.database();
+    this.watcher();
   }
 
   get user$() { return this.store.user$; }
+
+  watcher() {
+    this.store.user$
+      .combineLatest(x => x)
+      .do(user => {
+        this.database.ref('users/' + user.uid).on('value', snapshot => {
+          console.log(snapshot.val());
+        });
+      })
+      .subscribe();
+  }
+
+  writeUserData() {
+    this.store.user$
+      .do(user => {
+        this.database.ref('users/' + user.uid).set({
+          username: user.displayName,
+          email: user.email
+        });
+      })
+      .subscribe().unsubscribe();
+  }
 }
