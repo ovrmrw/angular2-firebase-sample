@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Page1Component } from '../page1/page1.component';
 import { AppService } from './app.service';
+import { FirebaseUiComponent } from '../firebaseui/fbui.component';
 
 
 @Component({
@@ -11,7 +12,16 @@ import { AppService } from './app.service';
       <a linkTo="/">Home</a>
       <a linkTo="/blog">Foo(empty)</a>
     </nav>
-    <route-view></route-view>
+
+    <div *ngIf="!(user | async)">
+      <button (click)="login()">Google LogIn</button>
+    </div>
+    <div *ngIf="(user | async)">
+      <button (click)="logout()">Google LogOut</button>
+      <div>{{email | async}} としてログイン中</div>
+    </div>
+    
+    <route-view *ngIf="(user | async)"></route-view>
   `,
   providers: [AppService],
   changeDetection: ChangeDetectionStrategy.Default
@@ -19,11 +29,20 @@ import { AppService } from './app.service';
 export class AppComponent implements OnInit {
   constructor(
     private service: AppService
-  ) {
-    this.service.jumpSignInPageIfUserIsNotLoggedIn();
-  }
+  ) { }
 
   ngOnInit() { }
+
+  login() {
+    this.service.loginGoogleAuth();
+  }
+
+  logout() {
+    this.service.logout();
+  }
+
+  get user() { return this.service.user$; }
+  get email() { return this.service.user$.map(user => user.email); }
 
   title: string = 'top component';
 }

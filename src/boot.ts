@@ -7,6 +7,7 @@ import { bootstrap } from '@angular/platform-browser-dynamic';
 import { provideRouter, HashLocationStrategy } from '@ngrx/router';
 
 import { AppComponent, routes } from './app/app.component';
+import { Store } from './store/store';    
 
 
 if (process.env.ENV === 'production') {
@@ -14,5 +15,6 @@ if (process.env.ENV === 'production') {
 }
 
 bootstrap(AppComponent, [
-  provideRouter(routes, HashLocationStrategy)
+  provideRouter(routes, HashLocationStrategy),
+  Store,
 ]);

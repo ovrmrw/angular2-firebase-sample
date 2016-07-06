@@ -2,9 +2,8 @@ import { Injectable } from '@angular/core';
 import firebase from 'firebase';
 import { Store } from '../store/store';
 
-
 @Injectable()
-export class AppService {
+export class FirebaseUiService {
   private googleProvider: firebase.auth.GoogleAuthProvider;
 
   constructor(
