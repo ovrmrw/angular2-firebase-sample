@@ -57,7 +57,7 @@ gulp.task('mocha:rxjs:w', ['mocha:rxjs'], () => {
 // Build for deploy
 
 gulp.task('clean', () => {
-  return del(['.dest', '*.log', 'npm-debug.log.*']);
+  return del(['.awcache', '.dest', '*.log', 'npm-debug.log.*']);
 });
 
 const copyFiles = [

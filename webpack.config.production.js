@@ -77,7 +77,7 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        include: helpers.root('src'),
+        // include: helpers.root('src'),
         loader: 'raw-loader'
       }
     ]

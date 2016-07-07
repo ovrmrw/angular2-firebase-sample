@@ -1,19 +1,25 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, Input } from '@angular/core';
-import { Observable } from 'rxjs/Rx';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, ElementRef, Input, OnDestroy } from '@angular/core';
+import { Observable, Subscription } from 'rxjs/Rx';
+import uuid from 'node-uuid';
 
 import { NoteService } from './note.service';
+import { ContenteditableModel } from '../contenteditable-model';
 
 
 @Component({
-  moduleId: module.id,
-  selector: 'sg-auth',
+  selector: 'sg-note',
   template: `
-    <h3>note</h3>
+    <button (click)="newNote()">Create New Note</button>
     <div class="markdown-body">
-      <textarea />
+      <h3 contenteditable="true" [(contenteditableModel)]="title"></h3>    
+      <div contenteditable="true" [(contenteditableModel)]="content"></div>
     </div>
+    <hr />
+    <div class="markdown-body">{{title}}</div>
+    <div class="markdown-body">{{content}}</div>
   `,
-  styleUrls: [require('./github-markdown.css')],
+  styles: [require('./github-markdown.css')],
+  directives: [ContenteditableModel],
   providers: [NoteService],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -21,10 +27,44 @@ export class NoteComponent implements OnInit {
 
   constructor(
     private service: NoteService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private el: ElementRef
   ) { }
 
-  ngOnInit() { }
+  ngOnInit() {
+    this.subscriptions = [
+      Observable.fromEvent<KeyboardEvent>(this.el.nativeElement, 'keyup')
+        .debounceTime(1000)
+        .do(event => {
+          const note: Note = { uuid: this.uuid, title: this.title, content: this.content };
+          console.log(note);
+          this.service.writeNote(note);
+        })
+        .subscribe(() => this.cd.markForCheck())
+    ];
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(s => s.unsubscribe());
+  }
+
+  newNote() {
+    this.uuid = uuid.v4();
+    this.title = 'new note';
+    this.content = '(content)';
+  }
+
+  uuid: string;
+  title: string;
+  content: string;
+
+  subscriptions: Subscription[];
+
+}
 
 
+export interface Note {
+  uuid: string;
+  title: string;
+  content: string;
 }

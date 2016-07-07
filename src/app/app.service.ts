@@ -18,11 +18,16 @@ export class AppService {
   get user() { return this.store.user; }
 
   writeUserData() {
-    if (this.user && this.user.uid) {
-      this.database.ref('users/' + this.user.uid).set({
-        username: this.user.displayName,
-        email: this.user.email
+    const user = this.store.firebase.auth().currentUser;
+    try {
+      this.database.ref(`users/${user.uid}`).set({
+        displayName: user.displayName,
+        email: user.email,
+        providerId: user.providerId,
+        timestamp: new Date().getTime()
       });
+    } catch (err) {
+      console.error(err);
     }
   }
 
