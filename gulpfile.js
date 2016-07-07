@@ -57,19 +57,29 @@ gulp.task('mocha:rxjs:w', ['mocha:rxjs'], () => {
 // Build for deploy
 
 gulp.task('clean', () => {
-  return del(['.dest', '*.log']);
+  return del(['.dest', '*.log', 'npm-debug.log.*']);
 });
 
+const copyFiles = [
+  './public/*.{html,css,js}',
+  './node_modules/core-js/client/shim.min.js',
+  './node_modules/babel-polyfill/dist/polyfill.min.js',
+  './node_modules/firebase/firebase-app.js',
+  './node_modules/firebase/firebase-auth.js'
+];
+
 gulp.task('copy', ['clean'], () => {
-  const files = [
-    './public/*.html',
-    './node_modules/core-js/client/shim.min.js',
-    './node_modules/babel-polyfill/dist/polyfill.min.js',
-    './node_modules/firebase/firebase-app.js',
-    './node_modules/firebase/firebase-auth.js'
-  ];
-  return gulp.src(files)
+  return gulp.src(copyFiles)
     .pipe(gulp.dest('./.dest'));
 });
 
-gulp.task('build:p', ['copy']);
+gulp.task('copy:w', [], () => {
+  return gulp.src(copyFiles)
+    .pipe(gulp.dest('./.dest'));
+});
+
+gulp.task('build', ['copy']);
+
+gulp.task('build:w', [], () => {
+  gulp.watch([copyFiles], ['copy:w']);
+});

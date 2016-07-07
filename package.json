@@ -7,12 +7,13 @@
     "typings": "typings install",
     "build:client": "webpack",
     "build:client:w": "webpack --watch",
-    "build": "gulp build:p && npm run build:client",
+    "build": "gulp build && npm run build:client",
+    "build:p": "gulp build && webpack --config webpack.config.production.js",
     "prestart": "npm run build",
-    "start": "concurrently -k \"npm run build:client:w\" \"npm run ls\" ",
+    "start": "concurrently -k \"npm run build:client:w\" \"gulp build:w\" \"npm run ls\" ",
     "tslint": "tslint -c tslint.json src*/**/*.ts",
-    "build:test": "webpack --config test/webpack.config.test.js",
-    "build:test:w": "webpack --config test/webpack.config.test.js --watch",
+    "build:test": "webpack --config test-ng2/webpack.config.test.js",
+    "build:test:w": "webpack --config test-ng2/webpack.config.test.js --watch",
     "ls": "lite-server --config config/browsersync.json",
     "ls:e2e": "lite-server --config config/browsersync.e2e.json",
     "karma": "npm run build:test && karma start --single-run",
@@ -27,8 +28,8 @@
     "build:rxjs:w": "webpack --config test-rxjs/webpack.config.test.js --watch",
     "mocha:rxjs": "npm run build:rxjs && gulp mocha:rxjs",
     "mocha:rxjs:w": "npm run build:rxjs && concurrently -k \"npm run build:rxjs:w\" \"gulp mocha:rxjs:w\" ",
-    "serve": "gulp build:p && webpack --config webpack.config.production.js && firebase serve",
-    "deploy": "gulp build:p && webpack --config webpack.config.production.js && firebase deploy && firebase open hosting:site"
+    "serve": "npm run build:p && firebase serve",
+    "deploy": "npm run build:p && firebase deploy && firebase open hosting:site"
   },
   "repository": {
     "type": "git",
