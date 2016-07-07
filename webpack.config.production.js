@@ -6,6 +6,7 @@
 'use strict';
 
 const webpack = require('webpack');
+const helpers = require('./config/helpers');
 
 const atlQuery = { // stands for 'awesome-typescript-loader query'
   library: 'es6',
@@ -73,6 +74,11 @@ module.exports = {
           // ],
           // customAttrAssign: [/\)?\]?=/]
         }
+      },
+      {
+        test: /\.css$/,
+        include: helpers.root('src'),
+        loader: 'raw-loader'
       }
     ]
   },

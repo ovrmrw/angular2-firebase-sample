@@ -38,7 +38,7 @@ export class AuthComponent implements OnInit {
   }
 
   firebaseui() {
-    window.location.href = 'firebaseui.html';
+    window.location.href = '/firebase-auth.html';
   }
 
   get user$() { return this.service.user$; }

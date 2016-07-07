@@ -34,6 +34,9 @@ export class Store {
         user.getToken().then((token: string) => {
           this._accessToken = token;
           this._userSubject$.next(user);
+          this._firebase.database().ref('users/' + user.uid).on('value', snapshot => {
+            console.log(snapshot.val());
+          });
           window.location.hash = '';
           if (this._stateLogout) {
             window.location.reload();
@@ -53,6 +56,8 @@ export class Store {
   }
 
 
+  get user() { return this._firebase.auth().currentUser; }
+  get userName() { return this._firebase.auth().currentUser.displayName || this._firebase.auth().currentUser.email; }
   get user$() { return this._user$; }
   get userName$() { return this._user$.map(user => user.displayName || user.email); }
 
@@ -60,6 +65,6 @@ export class Store {
 
   get accessToken() { return this._accessToken; }
 
+
+
 }
-
-

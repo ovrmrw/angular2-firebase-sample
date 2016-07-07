@@ -12,30 +12,18 @@ export class AppService {
     private store: Store
   ) {
     this.database = store.firebase.database();
-    this.watcher();
   }
 
   get user$() { return this.store.user$; }
-
-  watcher() {
-    this.store.user$
-      .combineLatest(x => x)
-      .do(user => {
-        this.database.ref('users/' + user.uid).on('value', snapshot => {
-          console.log(snapshot.val());
-        });
-      })
-      .subscribe();
-  }
+  get user() { return this.store.user; }
 
   writeUserData() {
-    this.store.user$
-      .do(user => {
-        this.database.ref('users/' + user.uid).set({
-          username: user.displayName,
-          email: user.email
-        });
-      })
-      .subscribe().unsubscribe();
+    if (this.user && this.user.uid) {
+      this.database.ref('users/' + this.user.uid).set({
+        username: this.user.displayName,
+        email: this.user.email
+      });
+    }
   }
+
 }
