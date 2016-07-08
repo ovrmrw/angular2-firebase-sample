@@ -9,11 +9,11 @@ import { AuthService } from './auth.service';
   selector: 'sg-auth',
   template: `
     <div *ngIf="!(user$ | async)">
-      <button (click)="signIn()">Google Sign In</button>
-      <button (click)="firebaseui()">Firebase UI</button>
+      <button type="button" class="btn btn-info" (click)="signIn()">Google Sign In</button>
+      <button type="button" class="btn btn-info" (click)="firebaseui()">Firebase UI</button>
     </div>
     <div *ngIf="(user$ | async)">
-      <button (click)="signOut()">Sign Out</button>
+      <button type="button" class="btn btn-secondary" (click)="signOut()">Sign Out</button>
       <div>{{userName$ | async}} としてログイン中</div>
     </div>
   `,

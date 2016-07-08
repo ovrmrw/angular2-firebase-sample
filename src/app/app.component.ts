@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { Page1Component } from '../page1/page1.component';
 import { AuthComponent } from '../auth/auth.component';
 import { NoteComponent } from '../note/note.component';
+import { ProfileComponent } from '../profile/profile.component';
 
 @Component({
   selector: 'sg-app',
@@ -15,8 +16,9 @@ import { NoteComponent } from '../note/note.component';
       <nav>
         <a linkTo="/">Home</a>
         <a linkTo="/note">Note</a>
+        <a linkTo="/profile">Profile</a>
       </nav>
-      <button (click)="writeUserData()">writeUserData</button>
+      <button type="button" class="btn btn-primary-outline" (click)="writeUserData()">Write User Data</button>
       <route-view></route-view>
     </ng-container>    
   `,
@@ -37,7 +39,7 @@ export class AppComponent implements OnInit {
 
   get user$() { return this.service.user$; }
 
-  title: string = 'top component';
+  title: string = 'ovrmrw-firebase-sample';
 }
 
 
@@ -50,6 +52,10 @@ export const routes: Routes = [
   {
     path: '/note',
     component: NoteComponent
+  },
+  {
+    path: '/profile',
+    component: ProfileComponent
   },
   // {
   //   path: '/blog',
