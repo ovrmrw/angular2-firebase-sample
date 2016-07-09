@@ -4,7 +4,6 @@ import { FormGroup, FormControl } from '@angular/forms';
 import firebase from 'firebase';
 import lodash from 'lodash';
 
-import { Store } from '../store';
 import { FirebaseUser } from '../types';
 import { ContenteditableModel } from '../contenteditable-model';
 import { ProfileService } from './profile.service';
@@ -24,16 +23,13 @@ import { ProfileService } from './profile.service';
 })
 export class ProfileComponent implements OnInit, OnDestroy {
   constructor(
-    private store: Store,
     private service: ProfileService,
     private cd: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
-    const user = this.store.user;
-
     this.disposableSubscriptions = [
-      this.service.readUserData(user)
+      this.service.readUserData()
         .subscribe(userData => {
           this.name = userData.name;
           this.cd.markForCheck();
@@ -46,8 +42,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   writeUserData(profile: FirebaseUser) {
-    const user = this.store.user;
-    this.service.writeUserData(user, profile);
+    this.service.writeUserData(profile);
   }
 
 

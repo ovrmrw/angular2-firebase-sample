@@ -77,13 +77,9 @@ export class NoteComponent implements OnInit {
       Observable.fromEvent<KeyboardEvent>(this.el.nativeElement, 'keyup')
         .debounceTime(1000 * 2)
         .do(event => {
-          // const note: Note = { noteid: this.uuid, title: this.title, content: this.content };
-          const note = this.note;
-          console.log(note);
-          // this.note.subscribe(note => this.service.writeNote(note)).unsubscribe();
-          this.service.writeNote(note);
+          this.service.writeNote(this.note);
         })
-        .subscribe(() => this.cd.markForCheck())
+        .subscribe()
     ];
   }
 
