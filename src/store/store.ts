@@ -11,6 +11,8 @@ export class Store {
 
   private _user$: Observable<firebase.User>;
   private _userSubject$ = new ReplaySubject<firebase.User>();
+  private _status$: Observable<string>;
+  private _statusSubject$ = new ReplaySubject<string>();
   private _accessToken: string;
   private _stateLogout = false;
 
@@ -24,6 +26,8 @@ export class Store {
   registerSubjects() {
     this._user$ = this._userSubject$
       .scan<firebase.User>((p, value) => value);
+    this._status$ = this._statusSubject$
+      .scan<string>((p, value) => value);
   }
 
   firebaseOnAuthStateChangedDetector(firebase: firebase.app.App): void {
@@ -34,6 +38,7 @@ export class Store {
         user.getToken().then((token: string) => {
           this._accessToken = token;
           this._userSubject$.next(user);
+          this._statusSubject$.next('signin');
           this._firebase.database().ref('users/' + user.uid).on('value', snapshot => {
             console.log(snapshot.val());
           });
@@ -45,12 +50,14 @@ export class Store {
       } else {
         console.log('Event: onAuthStateChanged: SIGN-OUT');
         this._userSubject$.next(null);
+        this._statusSubject$.next('signout');
         this._stateLogout = true;
       }
     }, err => {
       console.log('Event: onAuthStateChanged: ERROR');
       console.log(err);
       this._userSubject$.next(null);
+      this._statusSubject$.next('signout');
       this._stateLogout = true;
     });
   }
@@ -58,8 +65,10 @@ export class Store {
 
   get user() { return this._firebase.auth().currentUser; }
   get userName() { return this._firebase.auth().currentUser.displayName || this._firebase.auth().currentUser.email; }
+  get userId() { return this._firebase.auth().currentUser.uid; }
   get user$() { return this._user$; }
   get userName$() { return this._user$.map(user => user.displayName || user.email); }
+  get status$() { return this._status$; }
 
   get firebase() { return this._firebase; }
 
