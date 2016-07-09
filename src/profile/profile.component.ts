@@ -4,65 +4,44 @@ import firebase from 'firebase';
 import lodash from 'lodash';
 
 import { Store } from '../store';
+import { FirebaseUser } from '../types';
 import { ContenteditableModel } from '../contenteditable-model';
-
+import { ProfileService } from './profile.service';
 
 @Component({
-  moduleId: module.id,
   selector: 'sg-profile',
   template: `
     <form #form="ngForm">
-      <fieldset class="form-group" ngModelGroup="profile">
-        <label for="profile-name">Name</label>
-        <input type="text" class="form-control" id="profile-name" placeholder="your name" name="name" ngModel>
-      </fieldset>
+      <label for="profile-name">Name</label>
+      <input type="text" class="form-control" id="profile-name" placeholder="your name" name="name" [(ngModel)]="name">
     </form>
-    <pre>{{form.value | json}}</pre>
-    <button type="button" class="btn btn-primary-outline" (click)="rewriteUser(form.value)">Rewrite User Data</button>
-    <hr />
-    <button type="button" class="btn btn-primary-outline" (click)="ok()">OK</button>
-    <button type="button" class="btn btn-secondary-outline" (click)="cancel()">CANCEL</button>
+    <button type="button" class="btn btn-primary-outline" (click)="writeUserData(form.value)">Overwrite User Data</button>
   `,
   directives: [ContenteditableModel],
+  providers: [ProfileService],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfileComponent implements OnInit {
   constructor(
-    private store: Store
+    private store: Store,
+    private service: ProfileService,
+    private cd: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
     const user = this.store.user;
+    this.service.readUserData(user)
+      .then(userData => {
+        this.name = userData.name;
+        this.cd.markForCheck();
+      });
   }
 
-  rewriteUser(value: Profile) {
-    const profile = lodash.cloneDeep(value.profile);
+  writeUserData(profile: FirebaseUser) {
     const user = this.store.user;
-    profile.uid = this.store.user.uid;
-    const refPath = 'users/' + user.uid;
-    firebase.database().ref(refPath).once('value').then(snapshot => {
-      const newData = lodash.defaultsDeep(profile, snapshot.val());
-      firebase.database().ref(refPath).set(newData);
-    });
+    this.service.writeUserData(user, profile);
   }
 
-  ok() {
-    alert('TODO: ok!');
-  }
 
-  cancel() {
-    alert('TODO: cancel!');
-  }
-
-  profile: Profile;
-  text: string;
-}
-
-
-
-export interface Profile {
-  profile: {
-    uid: string;
-    name: string;
-  }
+  name: string;
 }

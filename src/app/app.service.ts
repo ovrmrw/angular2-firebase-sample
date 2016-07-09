@@ -1,34 +1,39 @@
 import { Injectable } from '@angular/core';
+import { ReplaySubject } from 'rxjs/Rx';
 import firebase from 'firebase';
+import lodash from 'lodash';
 
 import { Store } from '../store';
-
+import { FirebaseUser } from '../types';
 
 @Injectable()
 export class AppService {
-  private database: firebase.database.Database;
-
   constructor(
     private store: Store
-  ) {
-    this.database = store.firebase.database();
+  ) { }
+
+
+  readUserData(user: firebase.User): ReplaySubject<FirebaseUser> {
+    const refPath = 'users/' + user.uid;
+    const subject = new ReplaySubject<FirebaseUser>();
+    firebase.database().ref(refPath).on('value', snapshot => {
+      subject.next(snapshot.val());
+    });
+    return subject;
   }
 
-  get user$() { return this.store.user$; }
-  get user() { return this.store.user; }
-
-  writeUserData() {
-    const user = this.store.firebase.auth().currentUser;
-    try {
-      this.database.ref(`users/${user.uid}`).set({
+  writeUserData(user: firebase.User): void {
+    const refPath = 'users/' + user.uid;
+    firebase.database().ref(refPath).once('value', snapshot => {
+      const obj = {
         displayName: user.displayName,
         email: user.email,
         providerId: user.providerId,
         timestamp: new Date().getTime()
-      });
-    } catch (err) {
-      console.error(err);
-    }
+      };
+      const newData = lodash.defaultsDeep(obj, snapshot.val());
+      firebase.database().ref(refPath).set(newData).then(() => console.log(newData));
+    });
   }
 
 }

@@ -18,7 +18,8 @@ export class NoteService {
   writeNote(note: Note) {
     const user = this.store.firebase.auth().currentUser;
     try {
-      this.database.ref(`notes/${user.uid}/${note.uuid}`).set({
+      this.database.ref(`notes/${user.uid}/${note.noteid}`).set({
+        noteid: note.noteid,
         title: note.title,
         content: note.content,
         timestamp: new Date().getTime()

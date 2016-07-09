@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 
 import { AppService } from './app.service';
 import { AuthService } from './auth.service';
@@ -6,6 +6,7 @@ import { Store } from '../store';
 import { Page1Component } from '../page1/page1.component';
 import { AuthComponent } from '../auth/auth.component';
 import { NoteComponent } from '../note/note.component';
+import { NoteListComponent } from '../note-list/note-list.component';
 import { ProfileComponent } from '../profile/profile.component';
 
 @Component({
@@ -21,21 +22,22 @@ import { ProfileComponent } from '../profile/profile.component';
         </div>
         <div class="nabvar-collapse collapse navbar-toggleable-xs" id="bd-main-nav">
           <nav class="nav navbar-nav">
-              <a class="nav-item nav-link" linkTo="/">Home</a>
-              <a class="nav-item nav-link" linkTo="/profile">Profile</a>
-              <a class="nav-item nav-link" linkTo="/note">Note</a>            
-              <a class="nav-item nav-link" linkTo="#" (click)="signOut()">Sign Out</a>
+            <a class="nav-item nav-link" linkTo="/">Home</a>
+            <a class="nav-item nav-link" linkTo="/profile">Profile</a>
+            <a class="nav-item nav-link" linkTo="/notes">Notes</a>
+            <a class="nav-item nav-link" linkTo="/note">Note</a>
+            <a class="nav-item nav-link" linkTo="#" (click)="signOut()">Sign Out</a>
           </nav>
         </div>
       </header>
     </ng-container>    
 
     <ng-container *ngIf="(user$ | async)">
-      <button type="button" class="btn btn-primary-outline" (click)="writeUserData()">Write User Data</button>
+      <!-- <button type="button" class="btn btn-primary-outline" (click)="writeUserData()">Write User Data</button> -->
       <route-view></route-view>
       <hr />
       <footer>
-        <div>UserId: {{userId$ | async}}</div>
+        <div>UserId: {{userId}}, UserName: {{userName}}</div>
       </footer>
     </ng-container>
 
@@ -56,13 +58,25 @@ export class AppComponent implements OnInit {
   constructor(
     private service: AppService,
     private auth: AuthService,
-    private store: Store
+    private store: Store,
+    private cd: ChangeDetectorRef
   ) { }
 
-  ngOnInit() { }
-
-  writeUserData() {
-    this.service.writeUserData();
+  ngOnInit() {
+    this.user$
+      .do(user => {
+        if (user) {
+          // サインイン後の処理をここに書く。
+          this.service.readUserData(user)
+            .subscribe(userData => {
+              this.userId = user.uid.slice(0, 8) + '....';
+              this.userName = userData.name || '(unknown)';
+              this.cd.markForCheck();
+            });
+          this.service.writeUserData(user);
+        }
+      })
+      .subscribe();
   }
 
   firebaseUiAuth() {
@@ -73,19 +87,31 @@ export class AppComponent implements OnInit {
     this.auth.signOut();
   }
 
-  get user$() { return this.service.user$; }
-  get userId$() { return this.user$.map(user => user.uid.slice(0, 6) + '....'); }
+
+  get user$() { return this.store.user$; }
   get status$() { return this.store.status$; }
 
+  userId: string;
+  userName: string;
   title: string = 'firebase-sample';
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////
+// Routes
 import { Routes } from '@ngrx/router';
 export const routes: Routes = [
   {
     path: '/',
     component: Page1Component
+  },
+  {
+    path: '/notes',
+    component: NoteListComponent,
+  },
+  {
+    path: '/notes/:id',
+    component: NoteComponent
   },
   {
     path: '/note',
@@ -95,14 +121,4 @@ export const routes: Routes = [
     path: '/profile',
     component: ProfileComponent
   },
-  // {
-  //   path: '/blog',
-  //   component: BlogPage,
-  //   children: [
-  //     {
-  //       path: ':id',
-  //       component: PostPage
-  //     }
-  //   ]
-  // }
 ];
