@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs/Rx';
 import { FormGroup, FormControl } from '@angular/forms';
 import firebase from 'firebase';
 import lodash from 'lodash';
@@ -21,7 +22,7 @@ import { ProfileService } from './profile.service';
   providers: [ProfileService],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store,
     private service: ProfileService,
@@ -30,11 +31,18 @@ export class ProfileComponent implements OnInit {
 
   ngOnInit() {
     const user = this.store.user;
-    this.service.readUserData(user)
-      .then(userData => {
-        this.name = userData.name;
-        this.cd.markForCheck();
-      });
+
+    this.disposableSubscriptions = [
+      this.service.readUserData(user)
+        .subscribe(userData => {
+          this.name = userData.name;
+          this.cd.markForCheck();
+        }),
+    ];
+  }
+
+  ngOnDestroy() {
+    this.disposableSubscriptions.forEach(s => s.unsubscribe());
   }
 
   writeUserData(profile: FirebaseUser) {
@@ -44,4 +52,5 @@ export class ProfileComponent implements OnInit {
 
 
   name: string;
+  disposableSubscriptions: Subscription[] = [];
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ReplaySubject } from 'rxjs/Rx';
+import { Observable, ReplaySubject } from 'rxjs/Rx';
 import firebase from 'firebase';
 import lodash from 'lodash';
 
@@ -13,7 +13,7 @@ export class AppService {
   ) { }
 
 
-  readUserData(user: firebase.User): ReplaySubject<FirebaseUser> {
+  readUserData(user: firebase.User): Observable<FirebaseUser> {
     const refPath = 'users/' + user.uid;
     const subject = new ReplaySubject<FirebaseUser>();
     firebase.database().ref(refPath).on('value', snapshot => {

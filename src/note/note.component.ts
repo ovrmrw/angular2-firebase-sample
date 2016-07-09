@@ -51,7 +51,7 @@ export class NoteComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.subscriptions = [
+    this.disposableSubscriptions = [
       this.params$.pluck<string>('id')
         .do(id => {
           if (id) {
@@ -62,7 +62,6 @@ export class NoteComponent implements OnInit {
               console.log(note);
               this.note = note;
               this.cd.markForCheck();
-              // alert('Edit.');
             });
           } else {
             this.note = {
@@ -90,7 +89,7 @@ export class NoteComponent implements OnInit {
 
   ngOnDestroy() {
     this.service.writeNote(this.note);
-    this.subscriptions.forEach(s => s.unsubscribe());
+    this.disposableSubscriptions.forEach(s => s.unsubscribe());
   }
 
   deleteNote() {
@@ -110,7 +109,7 @@ export class NoteComponent implements OnInit {
   content: string;
   note: Note;
 
-  subscriptions: Subscription[];
+  disposableSubscriptions: Subscription[];
 
 }
 
