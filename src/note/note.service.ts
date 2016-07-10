@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
+import { Observable, ReplaySubject } from 'rxjs/Rx';
 import firebase from 'firebase';
 
 import { Store } from '../store';
-import { Note } from './note.component';
+import { FirebaseNote } from '../types';
 
 
 @Injectable()
@@ -15,17 +16,22 @@ export class NoteService {
     this.database = store.firebase.database();
   }
 
-  writeNote(note: Note) {
-    const user = this.store.firebase.auth().currentUser;
-    try {
-      this.database.ref(`notes/${user.uid}/${note.noteid}`).set({
-        noteid: note.noteid,
-        title: note.title,
-        content: note.content,
-        timestamp: new Date().getTime()
-      });
-    } catch (err) {
-      console.error(err);
-    }
+  readNote(noteid: string): Observable<FirebaseNote> {
+    const refPath = 'notes/' + this.store.uid + '/' + noteid;
+    const subject = new ReplaySubject<FirebaseNote>();
+    firebase.database().ref(refPath).once('value', snapshot => {
+      subject.next(snapshot.val());
+    });
+    return subject;
+  }
+
+  writeNote(note: FirebaseNote): void {
+    const refPath = /notes/ + this.store.uid + '/' + note.noteid;
+    this.store.writeToDb(refPath, note);
+  }
+
+  deleteNote(noteid: string) {
+    const refPath = 'notes/' + this.store.uid + '/' + noteid;
+    firebase.database().ref(refPath).remove(() => alert('Deleted.'));
   }
 }

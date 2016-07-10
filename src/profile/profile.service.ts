@@ -15,7 +15,7 @@ export class ProfileService {
 
 
   readUserData(): Observable<FirebaseUser> {
-    const user = this.store.user;
+    const user = this.store.currentUser;
     const refPath = 'users/' + user.uid;
     const subject = new ReplaySubject<FirebaseUser>();
     firebase.database().ref(refPath).on('value', snapshot => {
@@ -25,7 +25,7 @@ export class ProfileService {
   }
 
   writeUserData(profile: FirebaseUser): void {
-    const user = this.store.user;
+    const user = this.store.currentUser;
     const refPath = 'users/' + user.uid;
     firebase.database().ref(refPath).once('value', snapshot => {
       const overwriteObj = profile;
@@ -34,5 +34,5 @@ export class ProfileService {
     });
   }
 
-  get user() { return this.store.user; }
+  get user() { return this.store.currentUser; }
 }

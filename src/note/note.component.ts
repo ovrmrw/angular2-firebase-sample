@@ -2,23 +2,16 @@ import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, ElementR
 import { Observable, Subscription } from 'rxjs/Rx';
 import uuid from 'node-uuid';
 import { RouteParams, Router } from '@ngrx/router';
-import firebase from 'firebase';
 
 import { NoteService } from './note.service';
 import { ContenteditableModel } from '../contenteditable-model';
 import { Store } from '../store';
+import { FirebaseNote } from '../types';
 
 
 @Component({
   selector: 'sg-note',
   template: `
-    {{noteid}}
-    <!-- <button (click)="newNote()">Create New Note</button> -->
-    <div class="markdown-body">
-      <!-- <h3 contenteditable="true" [(contenteditableModel)]="(note | async).title"></h3> -->    
-      <!-- <div contenteditable="true" [(contenteditableModel)]="(note | async).content"></div> -->
-
-    </div>
     <form #form="ngForm" *ngIf="note">
       <fieldset class="form-group" ngModelGroup="note">
         <label for="note-title">Title</label>
@@ -28,6 +21,7 @@ import { Store } from '../store';
         <div contenteditable="true" [(contenteditableModel)]="note.content"></div>
       </fieldset>
     </form>
+    <button type="button" class="btn btn-primary" (click)="writeNoteAndMove()">SAVE</button>
     <button type="button" class="btn btn-warning" (click)="deleteNote()">DELETE</button>
     <hr />
     <div class="markdown-body">{{note | json}}</div>
@@ -37,9 +31,6 @@ import { Store } from '../store';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NoteComponent implements OnInit {
-  // noteid$: Observable<string>;
-  noteid: string;
-  noteRefPath: string;
 
   constructor(
     private store: Store,
@@ -51,67 +42,52 @@ export class NoteComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.disposableSubscriptions = [
-      this.params$.pluck<string>('id')
-        .do(id => {
-          if (id) {
-            const user = this.store.user;
-            this.noteRefPath = 'notes/' + user.uid + '/' + id;
-            firebase.database().ref(this.noteRefPath).once('value', snapshot => {
-              const note: Note = snapshot.val();
-              console.log(note);
+    this.store.ds = this.params$.pluck<string>('id')
+      .do(noteid => {
+        if (noteid) {
+          this.store.ds = this.service.readNote(noteid)
+            .do(note => {
               this.note = note;
               this.cd.markForCheck();
-            });
-          } else {
-            this.note = {
-              noteid: uuid.v4(),
-              title: '',
-              content: ''
-            };
-            this.cd.markForCheck();
-          }
-        })
-        .subscribe(),
+            })
+            .subscribe();
+        } else {
+          this.note = {
+            noteid: uuid.v4(),
+            title: '',
+            content: ''
+          };
+          this.cd.markForCheck();
+        }
+      })
+      .subscribe();
 
-      Observable.fromEvent<KeyboardEvent>(this.el.nativeElement, 'keyup')
-        .debounceTime(1000 * 2)
-        .do(event => {
-          this.service.writeNote(this.note);
-        })
-        .subscribe()
-    ];
+    this.store.ds = Observable.fromEvent<KeyboardEvent>(this.el.nativeElement, 'keyup')
+      .debounceTime(1000)
+      .do(event => {
+        this.note.timestamp = new Date().getTime();
+        this.service.writeNote(this.note);
+      })
+      .subscribe();
   }
 
   ngOnDestroy() {
     this.service.writeNote(this.note);
-    this.disposableSubscriptions.forEach(s => s.unsubscribe());
+    this.store.disposeSubscriptions();
   }
 
-  deleteNote() {
-    this.note = { title: '', content: '' };
-    firebase.database().ref(this.noteRefPath).remove(() => alert('Deleted.'));
+  writeNoteAndMove(){
+    this.service.writeNote(this.note);
     this.router.go('/notes');
   }
 
-  // newNote() {
-  //   this.uuid = uuid.v4();
-  //   this.title = 'new note';
-  //   this.content = '(content)';
-  // }
-
-  uuid: string;
-  title: string;
-  content: string;
-  note: Note;
-
-  disposableSubscriptions: Subscription[];
-
-}
+  deleteNote() {
+    const noteid = this.note.noteid;
+    this.note = { title: '', content: '' };
+    this.service.deleteNote(noteid);
+    this.router.go('/notes');
+  }
 
 
-export interface Note {
-  noteid?: string;
-  title: string;
-  content: string;
+  note: FirebaseNote;
 }

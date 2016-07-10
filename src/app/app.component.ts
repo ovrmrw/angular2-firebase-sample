@@ -22,10 +22,10 @@ import { ProfileComponent } from '../profile/profile.component';
         </div>
         <div class="nabvar-collapse collapse navbar-toggleable-xs" id="bd-main-nav">
           <nav class="nav navbar-nav">
-            <a class="nav-item nav-link" linkTo="/">Home</a>
-            <a class="nav-item nav-link" linkTo="/profile">Profile</a>
+            <a class="nav-item nav-link" linkTo="/">Home</a>            
             <a class="nav-item nav-link" linkTo="/notes">Notes</a>
             <a class="nav-item nav-link" linkTo="/note">Note</a>
+            <a class="nav-item nav-link" linkTo="/profile">Profile</a>
             <a class="nav-item nav-link" linkTo="#" (click)="signOut()">Sign Out</a>
           </nav>
         </div>
@@ -38,12 +38,13 @@ import { ProfileComponent } from '../profile/profile.component';
       <hr />
       <footer>
         <div>UserId: {{userId}}, UserName: {{userName}}</div>
+        <div><img [src]="photoURL" class="img-circle" width=80 height=80 alt="photo"></div>
       </footer>
     </ng-container>
 
     <ng-container *ngIf="(status$ | async) === 'signout'">
       <h3>firebase-sample</h3>
-      <button type="button" class="btn btn-primary-outline" (click)="firebaseUiAuth()">Sign In</button>
+      <button type="button" class="btn btn-primary-outline" (click)="firebaseUiAuth()">Sign In</button>      
     </ng-container>
     <ng-container *ngIf="!(status$ | async)">
       <div>Loading...</div>
@@ -71,6 +72,7 @@ export class AppComponent implements OnInit {
             .subscribe(userData => {
               this.userId = user.uid.slice(0, 8) + '....';
               this.userName = userData.name || '(unknown)';
+              this.photoURL = user.photoURL;
               this.cd.markForCheck();
             });
           this.service.writeUserData(user);
@@ -93,6 +95,7 @@ export class AppComponent implements OnInit {
 
   userId: string;
   userName: string;
+  photoURL: string;
   title: string = 'firebase-sample';
 }
 
@@ -103,7 +106,7 @@ import { Routes } from '@ngrx/router';
 export const routes: Routes = [
   {
     path: '/',
-    component: Page1Component
+    component: NoteListComponent
   },
   {
     path: '/notes',

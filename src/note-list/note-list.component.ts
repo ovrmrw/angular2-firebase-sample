@@ -38,8 +38,9 @@ export class NoteListComponent implements OnInit {
   notes: Note[] = [];
 
   ngOnInit() {
-    const user = this.store.user;
+    const user = this.store.currentUser;
     const refPath = 'notes/' + user.uid;
+    // const refPath = 'notes';
     firebase.database().ref(refPath).on('value', snapshot => {
       console.log(snapshot.val());
       console.log(lodash.toArray(snapshot.val()));

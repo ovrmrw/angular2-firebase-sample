@@ -25,10 +25,11 @@ export class AppService {
   writeUserData(user: firebase.User): void {
     const refPath = 'users/' + user.uid;
     firebase.database().ref(refPath).once('value', snapshot => {
-      const obj = {
+      const obj: FirebaseUser = {
         displayName: user.displayName,
         email: user.email,
         providerId: user.providerId,
+        photoURL: user.photoURL,
         timestamp: new Date().getTime()
       };
       const newData = lodash.defaultsDeep(obj, snapshot.val());
