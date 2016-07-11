@@ -38,19 +38,27 @@ export class NoteListComponent implements OnInit {
   notes: Note[] = [];
 
   ngOnInit() {
+    console.log('note-list.component - ngOnInit')
     const user = this.store.currentUser;
-    const refPath = 'notes/' + user.uid;
-    // const refPath = 'notes';
-    firebase.database().ref(refPath).on('value', snapshot => {
-      console.log(snapshot.val());
-      console.log(lodash.toArray(snapshot.val()));
-      this.notes = lodash.toArray<Note>(snapshot.val());
-      this.cd.markForCheck();
+    // const refPath = 'notes/' + user.uid;
+    const refPath = 'notes';
+    firebase.database().ref(refPath).orderByChild('author/' + user.uid).startAt(true).endAt(true).on('value', snapshot => {
+      firebase.database().ref(refPath).orderByChild('sharedTo/' + user.uid).startAt(true).endAt(true).on('value', snapshot2 => {
+        console.log('note-list');
+        console.log(snapshot);
+        console.log(snapshot.val());
+        console.log(snapshot2.val());
+        const merged = lodash.defaultsDeep(snapshot2.val() || {}, snapshot.val() || {});
+        console.log(lodash.toArray(merged));
+        this.notes = lodash.toArray<Note>(merged);
+        this.cd.markForCheck();
+      });
     });
   }
 
   ngOnDestroy() {
-
+    const refPath = 'notes';
+    firebase.database().ref(refPath).off();
   }
 
   toNote(note: Note) {

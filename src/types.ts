@@ -1,5 +1,5 @@
 export interface FirebaseUser {
-  uid?: string;  
+  uid?: string;
   displayName?: string;
   email?: string;
   name?: string;
@@ -13,4 +13,7 @@ export interface FirebaseNote {
   title?: string;
   content?: string;
   timestamp?: number;
+  author?: { [key: string]: boolean };
+  sharedTo?: { [key: string]: boolean };
+  ary?: string[];
 }

@@ -42,6 +42,7 @@ export class NoteComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    const uid = this.store.uid;
     this.store.ds = this.params$.pluck<string>('id')
       .do(noteid => {
         if (noteid) {
@@ -55,7 +56,9 @@ export class NoteComponent implements OnInit {
           this.note = {
             noteid: uuid.v4(),
             title: '',
-            content: ''
+            content: '',
+            author: { [uid]: true },
+            ary: [uid]
           };
           this.cd.markForCheck();
         }
@@ -65,7 +68,7 @@ export class NoteComponent implements OnInit {
     this.store.ds = Observable.fromEvent<KeyboardEvent>(this.el.nativeElement, 'keyup')
       .debounceTime(1000)
       .do(event => {
-        this.note.timestamp = new Date().getTime();
+        // this.note.timestamp = new Date().getTime();
         this.service.writeNote(this.note);
       })
       .subscribe();
@@ -76,7 +79,7 @@ export class NoteComponent implements OnInit {
     this.store.disposeSubscriptions();
   }
 
-  writeNoteAndMove(){
+  writeNoteAndMove() {
     this.service.writeNote(this.note);
     this.router.go('/notes');
   }

@@ -69,12 +69,16 @@ export class Store {
     });
   }
 
-  writeToDb(refPath: string, overwriteObj: {}) {
+  writeToDb(refPath: string, overwriteObj: {}, priority?: string) {
     firebase.database().ref(refPath).once('value', snapshot => {
       console.log(snapshot.val())
       const newData = lodash.defaultsDeep(overwriteObj, snapshot.val());
       console.log(newData)
-      firebase.database().ref(refPath).set(newData).then(() => console.log(newData));
+      if (priority) {
+        firebase.database().ref(refPath).setWithPriority(newData, priority).then(() => console.log(newData));
+      } else {
+        firebase.database().ref(refPath).set(newData).then(() => console.log(newData));
+      }
     });
   }
 

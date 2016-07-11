@@ -17,7 +17,7 @@ export class NoteService {
   }
 
   readNote(noteid: string): Observable<FirebaseNote> {
-    const refPath = 'notes/' + this.store.uid + '/' + noteid;
+    const refPath = 'notes/' + noteid;
     const subject = new ReplaySubject<FirebaseNote>();
     firebase.database().ref(refPath).once('value', snapshot => {
       subject.next(snapshot.val());
@@ -26,12 +26,13 @@ export class NoteService {
   }
 
   writeNote(note: FirebaseNote): void {
-    const refPath = /notes/ + this.store.uid + '/' + note.noteid;
+    const refPath = /notes/ + note.noteid;
+    note.timestamp = new Date().getTime();
     this.store.writeToDb(refPath, note);
   }
 
   deleteNote(noteid: string) {
-    const refPath = 'notes/' + this.store.uid + '/' + noteid;
+    const refPath = 'notes/' + noteid;
     firebase.database().ref(refPath).remove(() => alert('Deleted.'));
   }
 }
