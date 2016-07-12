@@ -100,13 +100,13 @@ export class NoteComponent implements OnInit {
       } else {
         console.log('update completed.');
         // setPriorityをしてもorderByPriorityの結果は全くあてにならない。
-        firebase.database().ref(notesIndexRefPath).setPriority(this.note.timestamp, err => {
-          if (err) {
-            console.error(err);
-          } else {
-            console.log('setPriority completed.');
-          }
-        });
+        // firebase.database().ref(notesIndexRefPath).setPriority(this.note.timestamp, err => {
+        //   if (err) {
+        //     console.error(err);
+        //   } else {
+        //     console.log('setPriority completed.');
+        //   }
+        // });
       }
     });
     // this.router.go('/notes');
