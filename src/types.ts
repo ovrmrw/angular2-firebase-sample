@@ -13,7 +13,13 @@ export interface FirebaseNote {
   title?: string;
   content?: string;
   timestamp?: number;
-  author?: { [key: string]: boolean };
+  author?: { [key: string]: any };
   sharedTo?: { [key: string]: boolean };
   ary?: string[];
+}
+
+export interface FirebaseNoteIndex {
+  noteid?: string;
+  readonly?: boolean;
+  timestamp?: number;
 }

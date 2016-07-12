@@ -28,7 +28,7 @@ export class NoteService {
   writeNote(note: FirebaseNote): void {
     const refPath = /notes/ + note.noteid;
     note.timestamp = new Date().getTime();
-    this.store.writeToDb(refPath, note);
+    this.store.writeToDb(refPath, note, 999);
   }
 
   deleteNote(noteid: string) {

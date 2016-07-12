@@ -9,7 +9,7 @@ import { Router } from '@ngrx/router';
 import { ContenteditableModel } from '../contenteditable-model';
 import { Store } from '../store';
 import { ReplaceLinePipe } from './replace-line.pipe';
-
+import { FirebaseNote, FirebaseNoteIndex } from '../types';
 
 @Component({
   selector: 'sg-note-list',
@@ -26,6 +26,7 @@ import { ReplaceLinePipe } from './replace-line.pipe';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NoteListComponent implements OnInit {
+  notes: FirebaseNote[] = [];
 
   constructor(
     // private service: NoteService,
@@ -35,42 +36,44 @@ export class NoteListComponent implements OnInit {
     private el: ElementRef
   ) { }
 
-  notes: Note[] = [];
-
   ngOnInit() {
-    console.log('note-list.component - ngOnInit')
-    const user = this.store.currentUser;
-    // const refPath = 'notes/' + user.uid;
-    const refPath = 'notes';
-    firebase.database().ref(refPath).orderByChild('author/' + user.uid).startAt(true).endAt(true).on('value', snapshot => {
-      firebase.database().ref(refPath).orderByChild('sharedTo/' + user.uid).startAt(true).endAt(true).on('value', snapshot2 => {
-        console.log('note-list');
-        console.log(snapshot);
-        console.log(snapshot.val());
-        console.log(snapshot2.val());
-        const merged = lodash.defaultsDeep(snapshot2.val() || {}, snapshot.val() || {});
-        console.log(lodash.toArray(merged));
-        this.notes = lodash.toArray<Note>(merged);
-        this.cd.markForCheck();
+    const uid = this.store.currentUser.uid;
+    const notesIndexRefPath = 'notesIndex/' + uid;
+    firebase.database().ref(notesIndexRefPath).orderByChild('timestamp').limitToFirst(3).on('value', snapshot => {
+      let noteIndices: FirebaseNoteIndex[] = lodash.toArray(snapshot.val());
+      /* reverse by timestamp */
+      noteIndices.sort((a, b) => a.timestamp > b.timestamp ? -1 : ((b.timestamp > a.timestamp) ? 1 : 0));
+      this.notes = [];
+      // console.log('note-list');
+      // console.log(noteIndices);
+      noteIndices.forEach((noteIndex, i) => {
+        const notesRefPath = 'notes/' + noteIndex.noteid;
+        firebase.database().ref(notesRefPath).once('value', snapshot => {
+          const note: FirebaseNote = snapshot.val();
+          // this.notes.push(snapshot.val());          
+          // console.log(notesRefPath);
+          // console.log(note);
+          this.notes.push(note);
+          // if (i === noteIndices.length - 1) {
+            this.cd.markForCheck();
+          // }
+        });
       });
+    }, err => {
+      console.error(err);
     });
   }
 
   ngOnDestroy() {
-    const refPath = 'notes';
-    firebase.database().ref(refPath).off();
+    const uid = this.store.currentUser.uid;
+    const notesIndexRefPath = 'notesIndex/' + uid;
+    firebase.database().ref(notesIndexRefPath).off(); // これを書かないと表示がおかしくなる。
   }
 
-  toNote(note: Note) {
+  toNote(note: FirebaseNote) {
     this.router.go('/notes/' + note.noteid);
   }
 
   subscriptions: Subscription[];
 
-}
-
-interface Note {
-  noteid: string;
-  title: string;
-  content: string;
 }

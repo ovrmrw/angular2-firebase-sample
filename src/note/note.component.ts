@@ -2,11 +2,12 @@ import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, ElementR
 import { Observable, Subscription } from 'rxjs/Rx';
 import uuid from 'node-uuid';
 import { RouteParams, Router } from '@ngrx/router';
+import firebase from 'firebase';
 
 import { NoteService } from './note.service';
 import { ContenteditableModel } from '../contenteditable-model';
 import { Store } from '../store';
-import { FirebaseNote } from '../types';
+import { FirebaseNote, FirebaseNoteIndex } from '../types';
 
 
 @Component({
@@ -57,8 +58,7 @@ export class NoteComponent implements OnInit {
             noteid: uuid.v4(),
             title: '',
             content: '',
-            author: { [uid]: true },
-            ary: [uid]
+            author: { [uid]: 999 },
           };
           this.cd.markForCheck();
         }
@@ -69,7 +69,8 @@ export class NoteComponent implements OnInit {
       .debounceTime(1000)
       .do(event => {
         // this.note.timestamp = new Date().getTime();
-        this.service.writeNote(this.note);
+        // this.service.writeNote(this.note);
+        this.writeNoteAndMove();
       })
       .subscribe();
   }
@@ -80,8 +81,26 @@ export class NoteComponent implements OnInit {
   }
 
   writeNoteAndMove() {
-    this.service.writeNote(this.note);
-    this.router.go('/notes');
+    // this.service.writeNote(this.note);
+    
+    const uid = this.store.uid;
+    // const indexKey = firebase.database().ref('notesIndex/' + uid).push().key;
+    this.note.timestamp = new Date().getTime();
+    let obj = {};
+    obj['notesIndex/' + uid + '/' + this.note.noteid] = {
+      noteid: this.note.noteid,
+      readonly: false,
+      timestamp: this.note.timestamp,
+    } as FirebaseNoteIndex;
+    obj['notes/' + this.note.noteid] = this.note;
+    firebase.database().ref().update(obj, err => {
+      if (err) {
+        console.error(err);
+      } else {
+        console.log('write completed.');
+      }
+    });
+    // this.router.go('/notes');
   }
 
   deleteNote() {

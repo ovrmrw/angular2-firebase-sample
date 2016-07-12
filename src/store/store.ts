@@ -69,7 +69,7 @@ export class Store {
     });
   }
 
-  writeToDb(refPath: string, overwriteObj: {}, priority?: string) {
+  writeToDb(refPath: string, overwriteObj: {}, priority?: string | number) {
     firebase.database().ref(refPath).once('value', snapshot => {
       console.log(snapshot.val())
       const newData = lodash.defaultsDeep(overwriteObj, snapshot.val());
