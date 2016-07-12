@@ -3,8 +3,6 @@ import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@
 import { AppService } from './app.service';
 import { AuthService } from './auth.service';
 import { Store } from '../store';
-import { Page1Component } from '../page1/page1.component';
-import { AuthComponent } from '../auth/auth.component';
 import { NoteComponent } from '../note/note.component';
 import { NoteListComponent } from '../note-list/note-list.component';
 import { ProfileComponent } from '../profile/profile.component';
@@ -18,11 +16,10 @@ import { ProfileComponent } from '../profile/profile.component';
           <button class="navbar-toggler pull-xs-right hidden-sm-up" type="button" data-toggle="collapse" data-target="#bd-main-nav">
             &#9776;
           </button>
-          <a class="navbar-brand hidden-sm-up" linkTo="/">Bootstrap</a>
+          <a class="navbar-brand hidden-sm-up" linkTo="/">Sample</a>
         </div>
         <div class="nabvar-collapse collapse navbar-toggleable-xs" id="bd-main-nav">
-          <nav class="nav navbar-nav">
-            <a class="nav-item nav-link" linkTo="/">Home</a>            
+          <nav class="nav navbar-nav">       
             <a class="nav-item nav-link" linkTo="/notes">Notes</a>
             <a class="nav-item nav-link" linkTo="/note">Note</a>
             <a class="nav-item nav-link" linkTo="/profile">Profile</a>
@@ -51,7 +48,6 @@ import { ProfileComponent } from '../profile/profile.component';
     </ng-container>
   `,
   styles: [require('./app.style.css')],
-  directives: [AuthComponent],
   providers: [AppService, AuthService],
   changeDetection: ChangeDetectionStrategy.Default
 })

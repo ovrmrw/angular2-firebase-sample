@@ -1,13 +1,13 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, ElementRef, Input, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy, ElementRef } from '@angular/core';
 import { Observable, Subscription } from 'rxjs/Rx';
 import uuid from 'node-uuid';
+import lodash from 'lodash';
 import { RouteParams, Router } from '@ngrx/router';
-import firebase from 'firebase';
 
 import { NoteService } from './note.service';
 import { ContenteditableModel } from '../contenteditable-model';
 import { Store } from '../store';
-import { FirebaseNote, FirebaseNoteIndex } from '../types';
+import { FirebaseNote, } from '../types';
 
 
 @Component({
@@ -19,6 +19,7 @@ import { FirebaseNote, FirebaseNoteIndex } from '../types';
         <input type="text" class="form-control" id="note-title" placeholder="title" name="title" [(ngModel)]="note.title">
         <label for="note-content">Content</label>
         <textarea class="form-control" id="note-content" rows="8" placeholder="content" name="content" [(ngModel)]="note.content"></textarea>
+        ↓ここでもContentを編集できる。
         <div contenteditable="true" [(contenteditableModel)]="note.content"></div>
       </fieldset>
     </form>
@@ -31,8 +32,7 @@ import { FirebaseNote, FirebaseNoteIndex } from '../types';
   providers: [NoteService],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class NoteComponent implements OnInit {
-
+export class NoteComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store,
     private params$: RouteParams,
@@ -43,82 +43,58 @@ export class NoteComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    const uid = this.store.uid;
-    this.store.ds = this.params$.pluck<string>('id')
+    const uid = this.store.currentUser.uid;
+
+    /* URLからidを取得する */
+    this.store.disposable = this.params$.pluck<string>('id')
       .do(noteid => {
         if (noteid) {
-          this.store.ds = this.service.readNote(noteid)
+          /* 保存済みnoteを呼び出す */
+          this.store.disposable = this.service.readNote$(noteid)
             .do(note => {
               this.note = note;
+              this.oldNote = lodash.cloneDeep(this.note);
               this.cd.markForCheck();
             })
             .subscribe();
         } else {
-          this.note = {
-            noteid: uuid.v4(),
-            title: '',
-            content: '',
-            author: { [uid]: 999 },
-          };
+          /* noteを新規作成 */
+          this.note = this.service.createNote();
+          this.oldNote = lodash.cloneDeep(this.note);
           this.cd.markForCheck();
         }
       })
       .subscribe();
 
-    this.store.ds = Observable.fromEvent<KeyboardEvent>(this.el.nativeElement, 'keyup')
+    /* キー入力がある度にnoteを保存する */
+    this.store.disposable = Observable.fromEvent<KeyboardEvent>(this.el.nativeElement, 'keyup')
       .debounceTime(1000)
-      .do(event => {
-        // this.note.timestamp = new Date().getTime();
-        // this.service.writeNote(this.note);
-        this.writeNoteAndMove();
+      .do(() => {
+        this.service.writeNote(this.note, this.oldNote);
       })
       .subscribe();
   }
 
   ngOnDestroy() {
-    this.service.writeNote(this.note);
+    this.service.writeNote(this.note, this.oldNote);
     this.store.disposeSubscriptions();
+    this.service.onDestroy();
   }
 
-  writeNoteAndMove() {
-    // this.service.writeNote(this.note);
 
-    const uid = this.store.uid;
-    const notesIndexRefPath = 'notesIndex/' + uid + '/' + this.note.noteid;
-    // const indexKey = firebase.database().ref('notesIndex/' + uid).push().key;
-    this.note.timestamp = new Date().getTime();
-    let obj = {};
-    obj[notesIndexRefPath] = {
-      noteid: this.note.noteid,
-      readonly: false,
-      timestamp: this.note.timestamp,
-    } as FirebaseNoteIndex;
-    obj['notes/' + this.note.noteid] = this.note;
-    firebase.database().ref().update(obj, err => {
-      if (err) {
-        console.error(err);
-      } else {
-        console.log('update completed.');
-        // setPriorityをしてもorderByPriorityの結果は全くあてにならない。
-        // firebase.database().ref(notesIndexRefPath).setPriority(this.note.timestamp, err => {
-        //   if (err) {
-        //     console.error(err);
-        //   } else {
-        //     console.log('setPriority completed.');
-        //   }
-        // });
-      }
-    });
-    // this.router.go('/notes');
+  writeNoteAndMove() {
+    this.service.writeNote(this.note, this.oldNote);
+    this.router.go('/notes');
   }
 
   deleteNote() {
     const noteid = this.note.noteid;
     this.note = { title: '', content: '' };
-    this.service.deleteNote(noteid);
+    this.service.removeNote(noteid);
     this.router.go('/notes');
   }
 
 
-  note: FirebaseNote;
+  private note: FirebaseNote;
+  private oldNote: FirebaseNote;
 }

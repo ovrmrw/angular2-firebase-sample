@@ -14,26 +14,30 @@ export class AppService {
 
 
   readUserData(user: firebase.User): Observable<FirebaseUser> {
-    const refPath = 'users/' + user.uid;
-    const subject = new ReplaySubject<FirebaseUser>();
-    firebase.database().ref(refPath).on('value', snapshot => {
-      subject.next(snapshot.val());
+    const usersRefPath = 'users/' + user.uid;
+    const returner$ = new ReplaySubject<FirebaseUser>();
+    firebase.database().ref(usersRefPath).on('value', snapshot => {
+      returner$.next(snapshot.val());
     });
-    return subject;
+    return returner$;
   }
 
   writeUserData(user: firebase.User): void {
-    const refPath = 'users/' + user.uid;
-    firebase.database().ref(refPath).once('value', snapshot => {
-      const obj: FirebaseUser = {
-        displayName: user.displayName,
-        email: user.email,
-        providerId: user.providerId,
-        photoURL: user.photoURL,
-        timestamp: new Date().getTime()
-      };
-      const newData = lodash.defaultsDeep(obj, snapshot.val());
-      firebase.database().ref(refPath).set(newData).then(() => console.log(newData));
+    const usersRefPath = 'users/' + user.uid;
+    const updateUser: FirebaseUser = {
+      displayName: user.displayName,
+      email: user.email,
+      providerId: user.providerId,
+      photoURL: user.photoURL,
+      timestamp: new Date().getTime()
+    };
+
+    firebase.database().ref(usersRefPath).update(updateUser, err => {
+      if (err) {
+        console.error(err);
+      } else {
+        console.log('writeUserData completed.');
+      }
     });
   }
 

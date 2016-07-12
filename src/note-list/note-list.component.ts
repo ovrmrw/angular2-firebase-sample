@@ -37,7 +37,7 @@ export class NoteListComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.service.destroy();
+    this.service.onDestroy();
   }
 
   toNote(note: FirebaseNote) {
@@ -45,4 +45,5 @@ export class NoteListComponent implements OnInit, OnDestroy {
   }
 
   private notes$: Observable<FirebaseNote[]>;
+  private notes: FirebaseNote[];
 }

@@ -15,7 +15,6 @@ export interface FirebaseNote {
   timestamp?: number;
   author?: { [key: string]: any };
   sharedTo?: { [key: string]: boolean };
-  ary?: string[];
 }
 
 export interface FirebaseNoteIndex {

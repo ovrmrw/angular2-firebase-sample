@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject, ReplaySubject, BehaviorSubject, Subscription } from 'rxjs/Rx';
 import firebase from 'firebase';
 import lodash from 'lodash';
-// import 'firebase/auth';
 const firebaseConfig = require('../../config/firebase.json');
 
 
@@ -18,7 +17,7 @@ export class Store {
   private _stateLogout = false;
 
   private _disposableSubscriptions: Subscription[] = [];
-  set ds(s: Subscription) { this._disposableSubscriptions.push(s); }
+  set disposable(s: Subscription) { this._disposableSubscriptions.push(s); }
   disposeSubscriptions() {
     this._disposableSubscriptions.forEach(s => s.unsubscribe());
   }
@@ -84,7 +83,6 @@ export class Store {
 
 
   get currentUser() { return this._firebase.auth().currentUser; }
-  get uid() { return this._firebase.auth().currentUser.uid; }
   get userName() { return this._firebase.auth().currentUser.displayName || this._firebase.auth().currentUser.email; }
   get userId() { return this._firebase.auth().currentUser.uid; }
   get user$() { return this._user$; }

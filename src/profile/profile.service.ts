@@ -9,30 +9,47 @@ import { FirebaseUser } from '../types';
 
 @Injectable()
 export class ProfileService {
+  disposablePaths: string[] = [
+
+  ];
   constructor(
     private store: Store
   ) { }
 
 
   readUserData(): Observable<FirebaseUser> {
-    const user = this.store.currentUser;
-    const refPath = 'users/' + user.uid;
-    const subject = new ReplaySubject<FirebaseUser>();
-    firebase.database().ref(refPath).on('value', snapshot => {
-      subject.next(snapshot.val());
+    const uid = this.store.currentUser.uid;
+    const usersRefPath = 'users/' + uid;
+    const returner$ = new ReplaySubject<FirebaseUser>();
+    firebase.database().ref(usersRefPath).on('value', snapshot => {
+      const user: FirebaseUser = snapshot.val(); // rename
+      returner$.next(user);
     });
-    return subject;
+    this.disposablePaths.push(usersRefPath);
+    return returner$;
   }
 
-  writeUserData(profile: FirebaseUser): void {
-    const user = this.store.currentUser;
-    const refPath = 'users/' + user.uid;
-    firebase.database().ref(refPath).once('value', snapshot => {
-      const overwriteObj = profile;
-      const newData = lodash.defaultsDeep(overwriteObj, snapshot.val());
-      firebase.database().ref(refPath).set(newData).then(() => console.log(newData));
+  writeUserData(name: string): void {
+    const uid = this.store.currentUser.uid;
+    const usersRefPath = 'users/' + uid;
+    const updateUser: FirebaseUser = {
+      name: name
+    };
+
+    firebase.database().ref(usersRefPath).update(updateUser, err => {
+      if (err) {
+        console.error(err);
+      } else {
+        console.log('writeUserData completed.');
+      }
     });
   }
 
-  get user() { return this.store.currentUser; }
+
+  onDestroy() {
+    lodash.uniq(this.disposablePaths).forEach(path => {
+      firebase.database().ref(path).off();
+    });
+  }
+
 }

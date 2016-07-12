@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs/Rx';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy, ElementRef } from '@angular/core';
+import { Observable, Subscription } from 'rxjs/Rx';
 import { FormGroup, FormControl } from '@angular/forms';
 import firebase from 'firebase';
 import lodash from 'lodash';
@@ -7,6 +7,7 @@ import lodash from 'lodash';
 import { FirebaseUser } from '../types';
 import { ContenteditableModel } from '../contenteditable-model';
 import { ProfileService } from './profile.service';
+import { Store } from '../store';
 
 @Component({
   selector: 'sg-profile',
@@ -15,7 +16,7 @@ import { ProfileService } from './profile.service';
       <label for="profile-name">Name</label>
       <input type="text" class="form-control" id="profile-name" placeholder="your name" name="name" [(ngModel)]="name">
     </form>
-    <button type="button" class="btn btn-primary-outline" (click)="writeUserData(form.value)">Overwrite User Data</button>
+    <button type="button" class="btn btn-primary-outline" (click)="writeUserData()">Overwrite User Data</button>
   `,
   directives: [ContenteditableModel],
   providers: [ProfileService],
@@ -24,28 +25,37 @@ import { ProfileService } from './profile.service';
 export class ProfileComponent implements OnInit, OnDestroy {
   constructor(
     private service: ProfileService,
-    private cd: ChangeDetectorRef
+    private store: Store,
+    private cd: ChangeDetectorRef,
+    private el: ElementRef
   ) { }
 
   ngOnInit() {
-    this.disposableSubscriptions = [
-      this.service.readUserData()
-        .subscribe(userData => {
-          this.name = userData.name;
-          this.cd.markForCheck();
-        }),
-    ];
+    this.store.disposable = this.service.readUserData()
+      .do(userData => {
+        this.name = userData.name;
+        this.cd.markForCheck();
+      })
+      .subscribe();
+
+    this.store.disposable = Observable.fromEvent<KeyboardEvent>(this.el.nativeElement, 'keyup')
+      .debounceTime(100)
+      .do(() => {
+        this.writeUserData();
+      })
+      .subscribe();
   }
 
   ngOnDestroy() {
-    this.disposableSubscriptions.forEach(s => s.unsubscribe());
-  }
-
-  writeUserData(profile: FirebaseUser) {
-    this.service.writeUserData(profile);
+    this.store.disposeSubscriptions();
+    this.service.onDestroy();
   }
 
 
-  name: string;
-  disposableSubscriptions: Subscription[] = [];
+  writeUserData() {
+    this.service.writeUserData(this.name);
+  }
+
+
+  private name: string;
 }
