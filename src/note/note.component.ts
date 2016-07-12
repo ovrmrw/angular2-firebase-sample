@@ -82,12 +82,13 @@ export class NoteComponent implements OnInit {
 
   writeNoteAndMove() {
     // this.service.writeNote(this.note);
-    
+
     const uid = this.store.uid;
+    const notesIndexRefPath = 'notesIndex/' + uid + '/' + this.note.noteid;
     // const indexKey = firebase.database().ref('notesIndex/' + uid).push().key;
     this.note.timestamp = new Date().getTime();
     let obj = {};
-    obj['notesIndex/' + uid + '/' + this.note.noteid] = {
+    obj[notesIndexRefPath] = {
       noteid: this.note.noteid,
       readonly: false,
       timestamp: this.note.timestamp,
@@ -97,7 +98,15 @@ export class NoteComponent implements OnInit {
       if (err) {
         console.error(err);
       } else {
-        console.log('write completed.');
+        console.log('update completed.');
+        // setPriorityをしてもorderByPriorityの結果は全くあてにならない。
+        firebase.database().ref(notesIndexRefPath).setPriority(this.note.timestamp, err => {
+          if (err) {
+            console.error(err);
+          } else {
+            console.log('setPriority completed.');
+          }
+        });
       }
     });
     // this.router.go('/notes');
