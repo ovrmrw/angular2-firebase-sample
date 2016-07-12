@@ -39,7 +39,7 @@ export class NoteListComponent implements OnInit {
   ngOnInit() {
     const uid = this.store.currentUser.uid;
     const notesIndexRefPath = 'notesIndex/' + uid;
-    firebase.database().ref(notesIndexRefPath).orderByChild('timestamp').limitToFirst(3).on('value', snapshot => {
+    firebase.database().ref(notesIndexRefPath).orderByChild('timestamp').limitToLast(100).on('value', snapshot => {
       let noteIndices: FirebaseNoteIndex[] = lodash.toArray(snapshot.val());
       /* reverse by timestamp */
       noteIndices.sort((a, b) => a.timestamp > b.timestamp ? -1 : ((b.timestamp > a.timestamp) ? 1 : 0));
