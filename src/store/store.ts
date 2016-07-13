@@ -4,6 +4,8 @@ import firebase from 'firebase';
 import lodash from 'lodash';
 const firebaseConfig = require('../../config/firebase.json');
 
+import { FirebaseNote } from '../types';
+
 
 @Injectable()
 export class Store {
@@ -15,6 +17,8 @@ export class Store {
   private _statusSubject$ = new ReplaySubject<string>();
   private _accessToken: string;
   private _stateLogout = false;
+
+  cachedNotes: FirebaseNote[] = [];
 
   private _disposableSubscriptions: Subscription[] = [];
   set disposable(s: Subscription) { this._disposableSubscriptions.push(s); }

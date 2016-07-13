@@ -12,7 +12,6 @@ export class NoteListService {
 
   notes$: ReplaySubject<FirebaseNote[]>;
   disposableRefPaths: string[];
-  cachedNotes: FirebaseNote[];
 
 
   constructor(
@@ -36,49 +35,61 @@ export class NoteListService {
 
     let e = lodash.unionBy(b, a, 'key'); // 2つの配列を1つにまとめ、同一キーのオブジェクトは左にあるものが生きる。(この場合はb)
     console.log(e); // [{ key: 'x', timestamp: '200' }]
+
+    let f = [{ key: 'x', timestamp: '100' }, { key: 'x', timestamp: '200' }];
+    let g = lodash.uniqBy(f, 'key'); // 同一キーのオブジェクトは左にあるものが生きる。
+    console.log(g); // [{ key: 'x', timestamp: '100' }]
+
+    let h = [{ key: 'x', timestamp: '200' }, { key: 'x', timestap: '100' }];
+    let i = lodash.uniqBy(h, 'key');
+    console.log(i); // [{ key: 'x', timestamp: '200' }]
   }
 
 
-  // TODO: timestampが変わっているnoteだけ新しいデータを取得するようにする。現状は毎回全noteを取得している。
-  /* notesIndexツリーのindexを取得してからnotesツリーのnote実体を取得する、という多段クエリ */
+  /* 
+    notesIndexツリーのindexを取得してからnotesツリーのnote実体を取得する、という多段クエリ。
+    Data Transferを節約するため、更新の必要があるnodeIndexだけを抽出する。 
+  */
   initNoteListReadStream(): Observable<FirebaseNote[]> {
-    this.experiment();
-    const uid = this.store.currentUser.uid;
+    // this.experiment();
+    const uid = this.store.currentUser.uid; // shorthand
     const notesIndexRefPath = 'notesIndex/' + uid;
 
     /* onメソッドはObservableを生成し、offメソッドをコールするまで待機し続ける。 */
     firebase.database().ref(notesIndexRefPath).orderByChild('timestamp').limitToLast(100).on('value', snapshot => {
-      let noteIndices: FirebaseNoteIndex[] = lodash.toArray(snapshot.val()); // rename, reshape
-      noteIndices = lodash.orderBy(noteIndices, ['timestamp'], ['desc']); // timestampをキーとして降順で並び替え
+      const noteIndices: FirebaseNoteIndex[] = lodash.toArray(snapshot.val()); // rename, reshape
 
-      const notes: FirebaseNote[] = [];
+      let cachedNotes = this.store.cachedNotes; // Storeに保存してあるcachedNotesを取得する
 
-      /* note取得ループの最後にnotes$.nextしてComponentにストリームを流す。 */
-      /* DEPRECATED
-      console.log('noteIndices.length: ' + noteIndices.length);
-      const markForCheckSubject = new Subject<number>();
-      const disposable = markForCheckSubject
-        .scan((p, value) => p + value, 0)
-        .do(counter => {
-          console.log('markForCheckSubject: ' + counter);
-          if (counter === noteIndices.length) {
-            this.notes$.next(notes);
-            disposable.unsubscribe();
+      /* 更新の必要があるnoteIndexだけを抽出する */
+      let differenceNoteIndices = noteIndices
+        .filter(noteIndex => {
+          const notes = cachedNotes.filter(note => note.noteid === noteIndex.noteid);
+          if (notes.length > 0 && notes[0].timestamp === noteIndex.timestamp) {
+            return false; // noteidとtimestampが同一のnoteは更新の必要がない
           }
-        })
-        .subscribe();
-      */
+          return true;
+        });
+      differenceNoteIndices = lodash.orderBy(differenceNoteIndices, ['timestamp'], ['desc']); // timestampの降順で並び替える
+      console.log('differenceNoteIndices: ');
+      console.log(differenceNoteIndices);
 
       /* noteIndexに基づいてnoteを取得する。onceメソッドは非同期のため完了は順不同となる。(本当に？) */
-      noteIndices.forEach(noteIndex => {
-        const notesRefPath = 'notes/' + noteIndex.noteid;
-        firebase.database().ref(notesRefPath).once('value', snapshot => {
-          const note: FirebaseNote = snapshot.val(); // rename
-          notes.push(note);
-          this.notes$.next(notes);
-          // markForCheckSubject.next(1); /* DEPRECATED */
+      if (differenceNoteIndices.length > 0) {
+        differenceNoteIndices.forEach(noteIndex => {
+          const notesRefPath = 'notes/' + noteIndex.noteid;
+          firebase.database().ref(notesRefPath).once('value', snapshot => {
+            const note: FirebaseNote = snapshot.val(); // rename
+            cachedNotes.unshift(note); // cachedNotesの先頭にnoteを追加
+            cachedNotes = lodash.uniqBy(cachedNotes, 'noteid'); // noteidの重複をまとめる。(先頭寄りにあるものを生かす)
+            cachedNotes = lodash.orderBy(cachedNotes, ['timestamp'], ['desc']); // timestampの降順で並べ替える
+            this.notes$.next(cachedNotes);
+            this.store.cachedNotes = cachedNotes; // 新しいcachedNotesをStoreのcachedNotesに書き戻す
+          });
         });
-      });
+      } else {
+        this.notes$.next(cachedNotes);
+      }
     }, err => {
       console.error(err);
     });
