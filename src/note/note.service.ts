@@ -10,11 +10,16 @@ import { FirebaseNote, FirebaseNoteIndex } from '../types';
 
 @Injectable()
 export class NoteService {
-  disposablePaths: string[] = [];
+  disposableRefPaths: string[];
+
 
   constructor(
     private store: Store
-  ) { }
+  ) {
+    /* initialize instance values */
+    this.disposableRefPaths = [];
+  }
+
 
   readNote$(noteid: string): Observable<FirebaseNote> {
     const notesRefPath = 'notes/' + noteid;
@@ -25,9 +30,10 @@ export class NoteService {
       const note: FirebaseNote = snapshot.val(); // rename
       returner$.next(note);
     });
-    this.disposablePaths.push(notesRefPath);
+    this.disposableRefPaths.push(notesRefPath);
     return returner$;
   }
+
 
   createNote(): FirebaseNote {
     const uid = this.store.currentUser.uid;
@@ -40,10 +46,13 @@ export class NoteService {
     };
   }
 
+
+  /* notesIndexツリーとnotesツリーの両方に同時にwriteする */
   writeNote(note: FirebaseNote, oldNote: FirebaseNote): void {
-    if (!note || !note.noteid || !oldNote || !oldNote.noteid || lodash.isEqual(note, oldNote)) { 
-      console.info('writeNote proccess is skipped.');
-      return; 
+    /* noteの内容に変更がある場合だけ処理を続行する */
+    if (!note || !note.noteid || !oldNote || !oldNote.noteid || lodash.isEqual(note, oldNote)) {
+      console.info('writeNote proccess is skipped, because updating is not needed.');
+      return;
     }
     const uid = this.store.currentUser.uid;
     const notesIndexRefPath = 'notesIndex/' + uid + '/' + note.noteid;
@@ -77,6 +86,7 @@ export class NoteService {
     });
   }
 
+
   /* noteをremoveするときはnotesとnotesIndexの両方をremoveする必要がある。 */
   removeNote(noteid: string): void {
     const uid = this.store.currentUser.uid;
@@ -91,7 +101,7 @@ export class NoteService {
 
 
   onDestroy() {
-    lodash.uniq(this.disposablePaths).forEach(path => {
+    lodash.uniq(this.disposableRefPaths).forEach(path => {
       firebase.database().ref(path).off();
     });
   }

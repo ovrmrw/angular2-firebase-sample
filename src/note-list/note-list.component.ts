@@ -13,7 +13,7 @@ import { FirebaseNote } from '../types';
   selector: 'sg-note-list',
   template: `
     <div class="card-columns">
-      <div class="card card-block" *ngFor="let note of notes$ | async" (click)="toNote(note)">
+      <div class="card card-block" *ngFor="let note of notes | async" (click)="toNote(note)">
         <h4 class="card-title">{{note.title}}</h4>
         <div class="card-text" [innerHtml]="note.content | replaceLine"></div>
       </div>
@@ -32,18 +32,22 @@ export class NoteListComponent implements OnInit, OnDestroy {
     private cd: ChangeDetectorRef
   ) { }
 
+
   ngOnInit() {
-    this.notes$ = this.service.initNoteListReadStream();
+    this.notes = this.service.initNoteListReadStream();
   }
+
 
   ngOnDestroy() {
     this.service.onDestroy();
   }
 
+
   toNote(note: FirebaseNote) {
     this.router.go('/notes/' + note.noteid);
   }
 
-  private notes$: Observable<FirebaseNote[]>;
-  private notes: FirebaseNote[];
+
+  private notes: Observable<FirebaseNote[]>;
+  // private notes: FirebaseNote[];
 }

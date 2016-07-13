@@ -9,6 +9,7 @@ import { ContenteditableModel } from '../contenteditable-model';
 import { ProfileService } from './profile.service';
 import { Store } from '../store';
 
+
 @Component({
   selector: 'sg-profile',
   template: `
@@ -30,6 +31,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private el: ElementRef
   ) { }
 
+
   ngOnInit() {
     this.store.disposable = this.service.readUserData()
       .do(userData => {
@@ -45,6 +47,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       })
       .subscribe();
   }
+
 
   ngOnDestroy() {
     this.store.disposeSubscriptions();

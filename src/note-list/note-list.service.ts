@@ -10,23 +10,29 @@ import { FirebaseNote, FirebaseNoteIndex } from '../types';
 @Injectable()
 export class NoteListService {
 
-  notes$ = new ReplaySubject<FirebaseNote[]>();
-  disposablePaths: string[] = [];
+  notes$: ReplaySubject<FirebaseNote[]>;
+  disposableRefPaths: string[];
+
 
   constructor(
     private store: Store
-  ) { }
+  ) {
+    /* initialize instance values */
+    this.notes$ = new ReplaySubject<FirebaseNote[]>();
+    this.disposableRefPaths = [];
+  }
 
 
+  // TODO: timestampが変わっているnoteだけ新しいデータを取得するようにする。現状は毎回全noteを取得している。
+  /* notesIndexツリーのindexを取得してからnotesツリーのnote実体を取得する、という多段クエリ */
   initNoteListReadStream(): Observable<FirebaseNote[]> {
     const uid = this.store.currentUser.uid;
     const notesIndexRefPath = 'notesIndex/' + uid;
 
     /* onメソッドはObservableを生成し、offメソッドをコールするまで待機し続ける。 */
     firebase.database().ref(notesIndexRefPath).orderByChild('timestamp').limitToLast(100).on('value', snapshot => {
-      const noteIndices: FirebaseNoteIndex[] = lodash.toArray(snapshot.val()); // rename, reshape
-      /* array sort reverse by timestamp */
-      noteIndices.sort((a, b) => a.timestamp > b.timestamp ? -1 : ((b.timestamp > a.timestamp) ? 1 : 0));
+      let noteIndices: FirebaseNoteIndex[] = lodash.toArray(snapshot.val()); // rename, reshape
+      noteIndices = lodash.orderBy(noteIndices, ['timestamp'], ['desc']); // timestampをキーとして降順で並び替え
 
       const notes: FirebaseNote[] = [];
 
@@ -46,10 +52,7 @@ export class NoteListService {
         .subscribe();
       */
 
-      /* 
-        noteIndexに基づいてnoteを取得する。onceメソッドは非同期のため完了は順不同となる。
-        そのためnotes配列に一旦集めてからnotes$.nextでComponentにまとめて送るようにしている。 
-      */
+      /* noteIndexに基づいてnoteを取得する。onceメソッドは非同期のため完了は順不同となる。(本当に？) */
       noteIndices.forEach((noteIndex, i) => {
         const notesRefPath = 'notes/' + noteIndex.noteid;
         firebase.database().ref(notesRefPath).once('value', snapshot => {
@@ -62,7 +65,7 @@ export class NoteListService {
     }, err => {
       console.error(err);
     });
-    this.disposablePaths.push(notesIndexRefPath);
+    this.disposableRefPaths.push(notesIndexRefPath);
     return this.notes$;
   }
 
@@ -70,7 +73,7 @@ export class NoteListService {
   /* ComponentのngOnDestroyから呼ばれる。 */
   onDestroy(): void {
     /* onメソッドによる監視を解除する */
-    lodash.uniq(this.disposablePaths).forEach(path => {
+    lodash.uniq(this.disposableRefPaths).forEach(path => {
       firebase.database().ref(path).off();
     });
 

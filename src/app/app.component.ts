@@ -7,6 +7,7 @@ import { NoteComponent } from '../note/note.component';
 import { NoteListComponent } from '../note-list/note-list.component';
 import { ProfileComponent } from '../profile/profile.component';
 
+
 @Component({
   selector: 'sg-app',
   template: `
@@ -59,6 +60,7 @@ export class AppComponent implements OnInit {
     private cd: ChangeDetectorRef
   ) { }
 
+
   ngOnInit() {
     this.user$
       .do(user => {
@@ -77,9 +79,11 @@ export class AppComponent implements OnInit {
       .subscribe();
   }
 
+
   firebaseUiAuth() {
     window.location.href = '/firebaseui-auth.html';
   }
+
 
   signOut() {
     this.auth.signOut();
@@ -88,6 +92,7 @@ export class AppComponent implements OnInit {
 
   get user$() { return this.store.user$; }
   get status$() { return this.store.status$; }
+
 
   userId: string;
   userName: string;

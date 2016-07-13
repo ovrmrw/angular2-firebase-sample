@@ -16,11 +16,13 @@ export class AppService {
   readUserData(user: firebase.User): Observable<FirebaseUser> {
     const usersRefPath = 'users/' + user.uid;
     const returner$ = new ReplaySubject<FirebaseUser>();
+    
     firebase.database().ref(usersRefPath).on('value', snapshot => {
       returner$.next(snapshot.val());
     });
     return returner$;
   }
+
 
   writeUserData(user: firebase.User): void {
     const usersRefPath = 'users/' + user.uid;

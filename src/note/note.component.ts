@@ -42,6 +42,7 @@ export class NoteComponent implements OnInit, OnDestroy {
     private el: ElementRef
   ) { }
 
+
   ngOnInit() {
     const uid = this.store.currentUser.uid;
 
@@ -75,6 +76,7 @@ export class NoteComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
+
   ngOnDestroy() {
     this.service.writeNote(this.note, this.oldNote);
     this.store.disposeSubscriptions();
@@ -86,6 +88,7 @@ export class NoteComponent implements OnInit, OnDestroy {
     this.service.writeNote(this.note, this.oldNote);
     this.router.go('/notes');
   }
+
 
   deleteNote() {
     const noteid = this.note.noteid;

@@ -9,25 +9,30 @@ import { FirebaseUser } from '../types';
 
 @Injectable()
 export class ProfileService {
-  disposablePaths: string[] = [
+  disposableRefPaths: string[];
 
-  ];
+
   constructor(
     private store: Store
-  ) { }
+  ) {
+    /* initialize instance values */
+    this.disposableRefPaths = [];
+  }
 
 
   readUserData(): Observable<FirebaseUser> {
     const uid = this.store.currentUser.uid;
     const usersRefPath = 'users/' + uid;
     const returner$ = new ReplaySubject<FirebaseUser>();
+
     firebase.database().ref(usersRefPath).on('value', snapshot => {
       const user: FirebaseUser = snapshot.val(); // rename
       returner$.next(user);
     });
-    this.disposablePaths.push(usersRefPath);
+    this.disposableRefPaths.push(usersRefPath);
     return returner$;
   }
+
 
   writeUserData(name: string): void {
     const uid = this.store.currentUser.uid;
@@ -47,7 +52,7 @@ export class ProfileService {
 
 
   onDestroy() {
-    lodash.uniq(this.disposablePaths).forEach(path => {
+    lodash.uniq(this.disposableRefPaths).forEach(path => {
       firebase.database().ref(path).off();
     });
   }
