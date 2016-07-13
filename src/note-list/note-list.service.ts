@@ -12,6 +12,7 @@ export class NoteListService {
 
   notes$: ReplaySubject<FirebaseNote[]>;
   disposableRefPaths: string[];
+  cachedNotes: FirebaseNote[];
 
 
   constructor(
@@ -23,9 +24,25 @@ export class NoteListService {
   }
 
 
+  /* この仕組みを使って差分だけデータを取得する関数を作る */
+  experiment() {
+    let a = [{ key: 'x', timestamp: '100' }];
+    let b = [{ key: 'x', timestamp: '200' }];
+    let c = lodash.union(a, b); // 2つの配列を1つにまとめる。
+    console.log(c); // [{ key: 'x', timestamp: '100' }, { key: 'x', timestamp: '200' }]
+
+    let d = lodash.unionBy(a, b, 'key'); // 2つの配列を1つにまとめ、同一キーのオブジェクトは左にあるものが生きる。(この場合はa)
+    console.log(d); // [{ key: 'x', timestamp: '100' }]
+
+    let e = lodash.unionBy(b, a, 'key'); // 2つの配列を1つにまとめ、同一キーのオブジェクトは左にあるものが生きる。(この場合はb)
+    console.log(e); // [{ key: 'x', timestamp: '200' }]
+  }
+
+
   // TODO: timestampが変わっているnoteだけ新しいデータを取得するようにする。現状は毎回全noteを取得している。
   /* notesIndexツリーのindexを取得してからnotesツリーのnote実体を取得する、という多段クエリ */
   initNoteListReadStream(): Observable<FirebaseNote[]> {
+    this.experiment();
     const uid = this.store.currentUser.uid;
     const notesIndexRefPath = 'notesIndex/' + uid;
 
@@ -53,7 +70,7 @@ export class NoteListService {
       */
 
       /* noteIndexに基づいてnoteを取得する。onceメソッドは非同期のため完了は順不同となる。(本当に？) */
-      noteIndices.forEach((noteIndex, i) => {
+      noteIndices.forEach(noteIndex => {
         const notesRefPath = 'notes/' + noteIndex.noteid;
         firebase.database().ref(notesRefPath).once('value', snapshot => {
           const note: FirebaseNote = snapshot.val(); // rename
