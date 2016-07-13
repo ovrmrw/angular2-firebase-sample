@@ -61,15 +61,11 @@ export class NoteListService {
 
       let cachedNotes = this.store.cachedNotes; // Storeに保存してあるcachedNotesを取得する
 
-      /* 更新の必要があるnoteIndexだけを抽出する */
-      let differenceNoteIndices = noteIndices
-        .filter(noteIndex => {
-          const notes = cachedNotes.filter(note => note.noteid === noteIndex.noteid);
-          if (notes.length > 0 && notes[0].timestamp === noteIndex.timestamp) {
-            return false; // noteidとtimestampが同一のnoteは更新の必要がない
-          }
-          return true;
-        });
+      /* 更新の必要があるnoteIndexだけを抽出する(noteidとtimestampが同一のnoteは更新の必要がない) */
+      let differenceNoteIndices = noteIndices.filter(noteIndex => {
+        const compareNotes = cachedNotes.filter(note => note.noteid === noteIndex.noteid);
+        return (compareNotes.length > 0 && compareNotes[0].timestamp === noteIndex.timestamp) ? false : true;
+      });
       differenceNoteIndices = lodash.orderBy(differenceNoteIndices, ['timestamp'], ['desc']); // timestampの降順で並び替える
       console.log('differenceNoteIndices: ');
       console.log(differenceNoteIndices);
@@ -87,7 +83,7 @@ export class NoteListService {
             this.store.cachedNotes = cachedNotes; // 新しいcachedNotesをStoreのcachedNotesに書き戻す
           });
         });
-      } else {
+      } else { // differenceNoteIndices.length === 0
         this.notes$.next(cachedNotes);
       }
     }, err => {
