@@ -55,6 +55,8 @@ export class NoteListService {
     const uid = this.store.currentUser.uid; // shorthand
     const notesIndexRefPath = 'notesIndex/' + uid;
 
+    this.notes$.next(this.store.cachedNotes); // とりあえずキャッシュしてあるノートをViewに表示させる
+
     /* onメソッドはObservableを生成し、offメソッドをコールするまで待機し続ける。 */
     firebase.database().ref(notesIndexRefPath).orderByChild('timestamp').limitToLast(100).on('value', snapshot => {
       const noteIndices: FirebaseNoteIndex[] = lodash.toArray(snapshot.val()); // rename, reshape
@@ -71,7 +73,7 @@ export class NoteListService {
       console.log(differenceNoteIndices);
 
       /* noteIndexに基づいてnoteを取得する。onceメソッドは非同期のため完了は順不同となる。(本当に？) */
-      if (differenceNoteIndices.length > 0) {
+      if (differenceNoteIndices.length > 0) {        
         differenceNoteIndices.forEach(noteIndex => {
           const notesRefPath = 'notes/' + noteIndex.noteid;
           firebase.database().ref(notesRefPath).once('value', snapshot => {

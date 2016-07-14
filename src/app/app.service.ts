@@ -6,6 +6,7 @@ import lodash from 'lodash';
 import { Store } from '../store';
 import { FirebaseUser } from '../types';
 
+
 @Injectable()
 export class AppService {
   constructor(
