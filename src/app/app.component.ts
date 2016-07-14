@@ -68,10 +68,12 @@ export class AppComponent implements OnInit {
           // サインイン後の処理をここに書く。
           this.service.readUserData(user)
             .subscribe(userData => {
-              this.userId = user.uid.slice(0, 8) + '....';
-              this.userName = userData.name || '(unknown)';
-              this.photoURL = user.photoURL;
-              this.cd.markForCheck();
+              if (user) { // これがないとnull checkで引っかかる。
+                this.userId = user.uid.slice(0, 8) + '....';
+                this.userName = userData.name || '(unknown)';
+                this.photoURL = user.photoURL;
+                this.cd.markForCheck();
+              }
             });
           this.service.writeUserData(user);
         }

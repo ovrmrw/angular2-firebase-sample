@@ -35,7 +35,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.store.disposable = this.service.readUserData()
       .do(userData => {
-        this.name = userData.name;
+        this.name = userData.name || '';
         this.cd.markForCheck();
       })
       .subscribe();

@@ -11,10 +11,10 @@ import { FirebaseNote } from '../types';
 export class Store {
   private _firebase: firebase.app.App;
 
-  private _user$: Observable<firebase.User>;
-  private _userSubject$ = new ReplaySubject<firebase.User>();
-  private _status$: Observable<string>;
-  private _statusSubject$ = new ReplaySubject<string>();
+  private _user$: Observable<firebase.User | null>;
+  private _userSubject$ = new ReplaySubject<firebase.User | null>();
+  private _status$: Observable<string | null>;
+  private _statusSubject$ = new ReplaySubject<string | null>();
   private _accessToken: string;
   private _stateLogout = false;
 
@@ -35,9 +35,9 @@ export class Store {
 
   registerSubjects() {
     this._user$ = this._userSubject$
-      .scan<firebase.User>((p, value) => value);
+      .scan<firebase.User | null>((p, value) => value);
     this._status$ = this._statusSubject$
-      .scan<string>((p, value) => value);
+      .scan<string | null>((p, value) => value);
   }
 
   firebaseOnAuthStateChangedDetector(firebase: firebase.app.App): void {
@@ -90,13 +90,10 @@ export class Store {
   get userName() { return this._firebase.auth().currentUser.displayName || this._firebase.auth().currentUser.email; }
   get userId() { return this._firebase.auth().currentUser.uid; }
   get user$() { return this._user$; }
-  get userName$() { return this._user$.map(user => user.displayName || user.email); }
+  get userName$() { return this._user$.map(user => user ? user.displayName || user.email : console.warn('user is null.')); }
   get status$() { return this._status$; }
 
   get firebase() { return this._firebase; }
 
   get accessToken() { return this._accessToken; }
-
-
-
 }

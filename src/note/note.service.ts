@@ -88,7 +88,8 @@ export class NoteService {
 
 
   /* noteをremoveするときはnotesとnotesIndexの両方をremoveする必要がある。 */
-  removeNote(noteid: string): void {
+  removeNote(noteid: string | undefined): void {
+    if (!noteid) { return; }
     const uid = this.store.currentUser.uid;
     const notesIndexRefPath = 'notesIndex/' + uid + '/' + noteid;
     const notesRefPath = 'notes/' + noteid;

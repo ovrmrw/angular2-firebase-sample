@@ -16,7 +16,7 @@ export function setTimeoutPromise(ms: number, forNextTurn: boolean = false): Pro
 }
 
 
-export function elementText(element: HTMLElement, selectors: string, index: number = 0): string {
+export function elementText(element: HTMLElement, selectors: string, index: number = 0): string | null {
   return element.querySelectorAll(selectors)[index].textContent;
 }
 
