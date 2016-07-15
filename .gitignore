@@ -43,4 +43,4 @@ jspm_packages
 typings
 .awcache
 .dest
-.tempOutDir
+.tscOutDir

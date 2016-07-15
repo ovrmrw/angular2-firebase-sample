@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "typings": "typings install",
+    "tsc": "tsc -p .",
     "build:client": "webpack",
     "build:client:w": "webpack --watch",
     "build": "gulp build && npm run build:client",

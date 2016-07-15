@@ -10,8 +10,7 @@ const atlQueryForTest = { // stands for 'awesome-typescript-loader query'
     presets: ['es2015'],
     plugins: ['babel-plugin-espower'] // []
   },
-  useCache: true,
-  doTypeCheck: false
+  useCache: true
 };
 
 

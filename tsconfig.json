@@ -8,8 +8,15 @@
     "emitDecoratorMetadata": true,
     "strictNullChecks": true,
     "skipLibCheck": true,
-    "outDir": ".tempOutDir"
+    "outDir": ".tscOutDir"
   },
+  "include": [
+    "config/**/*.ts",
+    "lib/**/*.ts",
+    "src/**/*.ts",
+    "test-*/**/*.ts",
+    "typings/**/*.ts"
+  ],
   "exclude": [
     "node_modules"
   ]
