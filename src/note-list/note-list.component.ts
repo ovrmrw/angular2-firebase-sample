@@ -10,6 +10,7 @@ import { FirebaseNote } from '../types';
 
 
 @Component({
+  moduleId: module.id,
   selector: 'sg-note-list',
   template: `
     <div class="card-columns">
@@ -19,7 +20,7 @@ import { FirebaseNote } from '../types';
       </div>
     </div>
   `,
-  styles: [require('./note-list.style.css')],
+  styleUrls: ['./note-list.style.css'],
   pipes: [ReplaceLinePipe],
   providers: [NoteListService],
   changeDetection: ChangeDetectionStrategy.OnPush

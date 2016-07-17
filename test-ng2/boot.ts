@@ -2,7 +2,7 @@
 // Error.stackTraceLimit = Infinity;
 
 /* >>> boilerplate */
-import 'es6-shim';
+import 'core-js/shim';
 import 'babel-polyfill';
 
 import 'zone.js/dist/zone';
@@ -15,6 +15,8 @@ try {
 import 'zone.js/dist/async-test'; // asyncテストに必要
 import 'zone.js/dist/fake-async-test'; // fakeAsyncテストに必要
 
+import 'reflect-metadata';
+
 import { resetBaseTestProviders, setBaseTestProviders } from '@angular/core/testing';
 
 import {
@@ -24,7 +26,6 @@ import {
 
 resetBaseTestProviders();
 setBaseTestProviders(TEST_BROWSER_DYNAMIC_PLATFORM_PROVIDERS, TEST_BROWSER_DYNAMIC_APPLICATION_PROVIDERS);
+
+import '../src-specs/specs.ref'; // テストしたいTSファイル
 /* <<< boilerplate */
-
-
-import '../src-front/specs.ref'; // テストしたいTSファイル

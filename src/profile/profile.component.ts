@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy, ElementRef } from '@angular/core';
 import { Observable, Subscription } from 'rxjs/Rx';
 import { FormGroup, FormControl } from '@angular/forms';
-import firebase from 'firebase';
+// import firebase from 'firebase';
 import lodash from 'lodash';
 
 import { FirebaseUser } from '../types';

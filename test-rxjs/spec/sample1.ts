@@ -1,5 +1,4 @@
 /* >>> boilerplate */
-import '@types/mocha';
 import { Observable, Subject, TestScheduler } from 'rxjs/Rx';
 import chai from 'chai';
 const assert = chai.assert;

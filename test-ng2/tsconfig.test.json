@@ -19,7 +19,9 @@
       "presets": [
         "es2015"
       ],
-      "plugins": []
+      "plugins": [
+        "babel-plugin-espower"
+      ]
     },
     "useCache": true,
     "useWebpackText": true,

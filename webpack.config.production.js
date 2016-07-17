@@ -6,32 +6,25 @@
 'use strict';
 
 const webpack = require('webpack');
-const helpers = require('./config/helpers');
-
-const atlQuery = { // stands for 'awesome-typescript-loader query'
-  library: 'es6',
-  useBabel: true,
-  babelOptions: {
-    presets: ['es2015'],
-    plugins: []
-  },
-  useCache: true,
-  doTypeCheck: false
-};
+// const helpers = require('./config/helpers');
 
 const ENV = process.env.NODE_ENV = process.env.ENV = 'production';
 
 
 module.exports = {
-  entry: ['./src/boot.ts'],
+  entry: {
+    vendor: './config/vendor.ts',
+    boot: './src/boot.ts',
+  },
   output: {
     path: '.dest',
-    filename: 'webpack.bundle.js'
+    filename: 'webpack.bundle.[name].js'
   },
   resolve: {
     extensions: ['', '.ts', '.js']
   },
   plugins: [
+    new webpack.optimize.CommonsChunkPlugin('webpack.bundle.common.js'),
     new webpack.NoErrorsPlugin(),
     new webpack.optimize.DedupePlugin(),
     new webpack.optimize.UglifyJsPlugin({
@@ -52,8 +45,7 @@ module.exports = {
         test: /\.ts$/,
         exclude: [/node_modules/, /typings/],
         // loader: 'babel-loader!ts-loader' // first ts-loader(with tsconfig.json), second babel-loader
-        loader: 'awesome-typescript-loader', // babel-loader!ts-loader と同じようなもの 
-        query: atlQuery
+        loaders: ['awesome-typescript-loader', 'angular2-template-loader'],
       },
       {
         test: /\.json$/,
@@ -61,34 +53,12 @@ module.exports = {
       },
       {
         test: /\.html$/,
-        loader: "html-loader",
-        query: {
-          minimize: false
-          // minimize: true,
-          // removeAttributeQuotes: false,
-          // caseSensitive: true,
-          // customAttrSurround: [
-          //   [/#/, /(?:)/],
-          //   [/\*/, /(?:)/],
-          //   [/\[?\(?/, /(?:)/]
-          // ],
-          // customAttrAssign: [/\)?\]?=/]
-        }
+        loader: "raw-loader",
       },
       {
         test: /\.css$/,
-        // include: helpers.root('src'),
         loader: 'raw-loader'
       }
     ]
-  },
-  // node: {
-  //   global: 'window',
-  //   crypto: 'empty',
-  //   process: false,
-  //   module: false,
-  //   clearImmediate: false,
-  //   setImmediate: false
-  // }
-  // devtool: 'source-map', // output source map
+  }
 };

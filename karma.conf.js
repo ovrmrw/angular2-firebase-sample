@@ -16,7 +16,9 @@ module.exports = function (config) {
 
     // list of files / patterns to load in the browser
     files: [
-      './.bundles/webpack.bundle.spec.espowered.js'
+      './.bundles/webpack.bundle.spec.common.js',
+      './.bundles/webpack.bundle.spec.boot.js',
+      './.bundles/webpack.bundle.spec.vendor.js',
     ],
 
 
@@ -27,7 +29,7 @@ module.exports = function (config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      './.bundles/webpack.bundle.spec.espowered.js': ['sourcemap']
+      './.bundles/webpack.bundle.spec.boot.js': ['sourcemap']
     },
 
 
