@@ -26,7 +26,7 @@ module.exports = {
         test: /\.ts$/,
         exclude: [/node_modules/, /typings/],
         // loader: 'babel-loader!ts-loader' // first ts-loader(with tsconfig.json), second babel-loader
-        loaders: ['awesome-typescript-loader?library=es6&useBabel=true&babelOptions.presets[]=es2015&useCache=true&doTypeCheck=false', 'angular2-template-loader'],
+        loaders: ['awesome-typescript-loader', 'angular2-template-loader'],
       },
       {
         test: /\.json$/,
@@ -44,18 +44,3 @@ module.exports = {
   },
   devtool: 'source-map', // output source map
 };
-
-
-  // "awesomeTypescriptLoaderOptions": {
-  //   "library": "es6",
-  //   "useBabel": true,
-  //   "babelOptions": {
-  //     "presets": [
-  //       "es2015"
-  //     ],
-  //     "plugins": []
-  //   },
-  //   "useCache": true,
-  //   "useWebpackText": true,
-  //   "doTypeCheck": false
-  // }
