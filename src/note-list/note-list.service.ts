@@ -58,7 +58,7 @@ export class NoteListService {
     this.notes$.next(this.store.cachedNotes); // とりあえずキャッシュしてあるノートをViewに表示させる
 
     /* onメソッドはObservableを生成し、offメソッドをコールするまで待機し続ける。 */
-    firebase.database().ref(notesIndexRefPath).orderByChild('timestamp').limitToLast(100).on('value', snapshot => {
+    firebase.database().ref(notesIndexRefPath).orderByChild('timestamp').limitToLast(100).once('value', snapshot => {
       const noteIndices: FirebaseNoteIndex[] = lodash.toArray(snapshot.val()); // rename, reshape
 
       let cachedNotes = this.store.cachedNotes; // Storeに保存してあるcachedNotesを取得する
@@ -73,7 +73,7 @@ export class NoteListService {
       console.log(differenceNoteIndices);
 
       /* noteIndexに基づいてnoteを取得する。onceメソッドは非同期のため完了は順不同となる。(本当に？) */
-      if (differenceNoteIndices.length > 0) {        
+      if (differenceNoteIndices.length > 0) {
         differenceNoteIndices.forEach(noteIndex => {
           const notesRefPath = 'notes/' + noteIndex.noteid;
           firebase.database().ref(notesRefPath).once('value', snapshot => {
@@ -88,13 +88,57 @@ export class NoteListService {
       } else { // differenceNoteIndices.length === 0
         this.notes$.next(cachedNotes);
       }
-    }, err => {
-      console.error(err);
-    });
+    })
     this.disposableRefPaths.push(notesIndexRefPath);
+    this.registerChildObservers();
     return this.notes$;
   }
 
+
+  registerChildObservers() {
+    const uid = this.store.currentUser.uid; // shorthand
+    const notesIndexRefPath = 'notesIndex/' + uid;
+
+    firebase.database().ref(notesIndexRefPath).on('child_changed', snapshot => {
+      console.log('child_changed');
+      console.log(snapshot.val());
+      const noteIndex: FirebaseNoteIndex = snapshot.val(); // rename
+      const notesRefPath = 'notes/' + noteIndex.noteid;
+      this.renewCachedNotes(notesRefPath, this.store.cachedNotes);
+    });
+
+    /* child_added を書くとイニシャルロード時にも大量のchild_addedが発生するためコメントアウトした */
+    // firebase.database().ref(notesIndexRefPath).on('child_added', snapshot => {
+    //   console.log('child_added');
+    //   console.log(snapshot.val());
+    //   const noteIndex: FirebaseNoteIndex = snapshot.val(); // rename
+    //   const notesRefPath = 'notes/' + noteIndex.noteid;
+    //   this.renewCachedNotes(notesRefPath, this.store.cachedNotes);
+    // });
+
+    firebase.database().ref(notesIndexRefPath).on('child_removed', snapshot => {
+      console.log('child_removed')
+      console.log(snapshot.val());
+      const noteIndex: FirebaseNoteIndex = snapshot.val(); // rename
+      let cachedNotes = this.store.cachedNotes;
+      cachedNotes = lodash.reject(cachedNotes, { 'noteid': noteIndex.noteid });
+      this.notes$.next(cachedNotes);
+      this.store.cachedNotes = cachedNotes;
+    });
+    this.disposableRefPaths.push(notesIndexRefPath);
+  }
+
+
+  renewCachedNotes(notesRefPath: string, cachedNotes: FirebaseNote[]): void {
+    firebase.database().ref(notesRefPath).once('value', snapshotNote => {
+      const note: FirebaseNote = snapshotNote.val(); // rename
+      cachedNotes.unshift(note); // cachedNotesの先頭にnoteを追加
+      cachedNotes = lodash.uniqBy(cachedNotes, 'noteid'); // noteidの重複をまとめる
+      cachedNotes = lodash.orderBy(cachedNotes, ['timestamp'], ['desc']);
+      this.notes$.next(cachedNotes);
+      this.store.cachedNotes = cachedNotes;
+    });
+  }
 
   /* ComponentのngOnDestroyから呼ばれる。 */
   onDestroy(): void {
@@ -107,3 +151,5 @@ export class NoteListService {
   }
 
 }
+
+

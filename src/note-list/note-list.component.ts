@@ -49,6 +49,6 @@ export class NoteListComponent implements OnInit, OnDestroy {
   }
 
 
-  private notes: Observable<FirebaseNote[]>;
+  notes: Observable<FirebaseNote[]>;
   // private notes: FirebaseNote[];
 }

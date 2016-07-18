@@ -93,9 +93,11 @@ export class NoteService {
     const uid = this.store.currentUser.uid;
     const notesIndexRefPath = 'notesIndex/' + uid + '/' + noteid;
     const notesRefPath = 'notes/' + noteid;
+    this.store.cachedNotes = lodash.reject(this.store.cachedNotes, { 'noteid': noteid }); // firebaseを更新する前にメモリ上のキャッシュからnoteを削除する。
+
     firebase.database().ref(notesIndexRefPath).remove(() => {
       firebase.database().ref(notesRefPath).remove(() => {
-        alert('Removed from 2 json trees.');
+        alert('Removed from 2 json trees.');    
       });
     });
   }
