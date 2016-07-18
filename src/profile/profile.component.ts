@@ -60,5 +60,5 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
 
-  private name: string;
+  name: string;
 }

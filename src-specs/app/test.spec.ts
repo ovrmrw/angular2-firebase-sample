@@ -11,18 +11,17 @@ const firebaseConfig = require('../../config/firebase.json');
 import { AppComponent } from '../../src/app/app.component';
 import { AppService } from '../../src/app/app.service';
 import { Store } from '../../src/store';
-import { FirebaseUser } from '../../src/types';
+
 
 const user = {
-  uid: '1234567890',
-  name: 'test user',
+  uid: '123456789',
+  name: 'test',
   photoURL: ''
 };
 
 class MockStore {
   constructor() {
-    console.log('MockStore');
-    // firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
   }
   // user = {
   //   uid: '123456789',
@@ -33,26 +32,26 @@ class MockStore {
   status$ = Observable.of('signin');
 }
 
-class MockAppService {
-  constructor() {
-    console.log('MockAppService')
-  }
-  readUserData(): Observable<FirebaseUser> {
-    return Observable.of(user);
+class MockService {
+  readUserData(user: firebase.User) {
+    return user;
   }
   writeUserData(user: firebase.User | null) {
     // console.log('writeUserData');
   }
+  test() {
+    console.log('test method');
+  }
 }
 
 
-describe('TEST: App Component', () => {
+describe('TEST: Test', () => {
   /* >>> boilerplate */
   let builder: TestComponentBuilder;
 
   beforeEach(() => {
     addProviders([
-      { provide: Store, useClass: MockStore },
+      // { provide: Store, useClass: MockStore },
       // { provide: AppService, useClass: MockService }
     ]);
   });
@@ -63,17 +62,8 @@ describe('TEST: App Component', () => {
   /* <<< boilerplate */
 
 
-  it('can create, should have title', asyncPower(async () => {
-    const fixture = await builder
-      .overrideProviders(AppComponent, [{ provide: AppService, useClass: MockAppService }])
-      .createAsync(AppComponent);
-    const el = fixture.nativeElement as HTMLElement;
-    const component = fixture.componentRef.instance;
-    assert(!!fixture);
-
-    fixture.detectChanges();
-    assert(component.userId === '12345678....');
-    assert(component.userName === 'test user');
+  it('checking testing environment', asyncPower(async () => {
+    assert(1 + 1 === 2);
   }));
 
 });

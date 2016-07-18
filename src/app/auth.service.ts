@@ -11,8 +11,8 @@ export class AuthService {
   constructor(
     private store: Store
   ) {
-    this.googleProvider = new firebase.auth.GoogleAuthProvider();
-    this.googleProvider.addScope('https://www.googleapis.com/auth/plus.login');
+    // this.googleProvider = new firebase.auth.GoogleAuthProvider();
+    // this.googleProvider.addScope('https://www.googleapis.com/auth/plus.login');
   }
 
   signInGoogleAuth() {
@@ -24,6 +24,6 @@ export class AuthService {
     window.location.reload();
   }
 
-  get user$() { return this.store.user$; }
-  get userName$() { return this.store.userName$; }
+  // get user$() { return this.store.user$; }
+  // get userName$() { return this.store.userName$; }
 }

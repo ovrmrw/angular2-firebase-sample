@@ -18,7 +18,8 @@ module.exports = {
   },
   plugins: [
     // new webpack.NoErrorsPlugin(),
-    new webpack.optimize.CommonsChunkPlugin('webpack.bundle.spec.common.js')
+    // new webpack.optimize.CommonsChunkPlugin('webpack.bundle.spec.common.js')
+    new webpack.optimize.CommonsChunkPlugin({ name: 'vendor' })
   ],
   module: {
     loaders: [

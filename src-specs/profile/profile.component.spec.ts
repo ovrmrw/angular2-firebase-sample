@@ -5,24 +5,26 @@ import { inject, async, fakeAsync, tick, addProviders, TestComponentBuilder, Com
 import { asyncPower, fakeAsyncPower, setTimeoutPromise, elements, elementText } from '../../test-ng2/testing.helper';
 /* <<< boilerplate */
 
-import { Observable } from 'rxjs/Rx';
+import { provide, Injectable } from '@angular/core';
+import { Observable, BehaviorSubject, ReplaySubject } from 'rxjs/Rx';
 import firebase from 'firebase';
 const firebaseConfig = require('../../config/firebase.json');
-import { AppComponent } from '../../src/app/app.component';
-import { AppService } from '../../src/app/app.service';
+import { ProfileComponent } from '../../src/profile/profile.component';
+import { ProfileService } from '../../src/profile/profile.service';
 import { Store } from '../../src/store';
-import { FirebaseUser } from '../../src/types';
+import { FirebaseUser } from '../../src/types'
 
 const user = {
-  uid: '1234567890',
-  name: 'test user',
+  uid: '123456789',
   photoURL: ''
 };
 
+
+
 class MockStore {
   constructor() {
-    console.log('MockStore');
-    // firebase.initializeApp(firebaseConfig);
+    console.log('MockStore')
+    firebase.initializeApp(firebaseConfig);
   }
   // user = {
   //   uid: '123456789',
@@ -31,29 +33,39 @@ class MockStore {
   // };
   user$ = Observable.of(user);
   status$ = Observable.of('signin');
+  currentUser = user;
 }
 
-class MockAppService {
+
+class MockProfileService {
+  subject = new ReplaySubject();
   constructor() {
-    console.log('MockAppService')
+    console.log('MockService')
   }
   readUserData(): Observable<FirebaseUser> {
-    return Observable.of(user);
+    console.log('readUserData')
+    const user: FirebaseUser = {
+      name: 'test'
+    }
+    this.subject.next(user);
+    return this.subject;
   }
-  writeUserData(user: firebase.User | null) {
+  writeUserData(name: string): void {
+    console.log(name);
+    console.log('writeUserData');
     // console.log('writeUserData');
   }
 }
 
 
-describe('TEST: App Component', () => {
+describe('TEST: Profile Component', () => {
   /* >>> boilerplate */
   let builder: TestComponentBuilder;
 
   beforeEach(() => {
     addProviders([
       { provide: Store, useClass: MockStore },
-      // { provide: AppService, useClass: MockService }
+      // provide(ProfileService, { useClass: MockProfileService }), // Componentに直接インジェクトされているものはここには書かない。overrideProvidersに書く。
     ]);
   });
 
@@ -65,15 +77,14 @@ describe('TEST: App Component', () => {
 
   it('can create, should have title', asyncPower(async () => {
     const fixture = await builder
-      .overrideProviders(AppComponent, [{ provide: AppService, useClass: MockAppService }])
-      .createAsync(AppComponent);
+      .overrideProviders(ProfileComponent, [{ provide: ProfileService, useClass: MockProfileService }]) // ComponentのServiceをモックにすり替える場合はここに書く。
+      .createAsync(ProfileComponent);
     const el = fixture.nativeElement as HTMLElement;
     const component = fixture.componentRef.instance;
     assert(!!fixture);
 
     fixture.detectChanges();
-    assert(component.userId === '12345678....');
-    assert(component.userName === 'test user');
+    assert(component.name === 'test');
   }));
 
 });

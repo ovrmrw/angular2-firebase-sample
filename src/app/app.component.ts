@@ -56,7 +56,7 @@ import { ProfileComponent } from '../profile/profile.component';
 })
 export class AppComponent implements OnInit {
   constructor(
-    private service: AppService,
+    public service: AppService,
     private auth: AuthService,
     private store: Store,
     private cd: ChangeDetectorRef
@@ -68,7 +68,7 @@ export class AppComponent implements OnInit {
       .do(user => {
         if (user) {
           // サインイン後の処理をここに書く。
-          this.service.readUserData(user)
+          this.service.readUserData()
             .subscribe(userData => {
               if (user) { // これがないとnull checkで引っかかる。
                 this.userId = user.uid.slice(0, 8) + '....';
